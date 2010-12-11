@@ -16,6 +16,7 @@ import org.jruby.embed.InvokeFailedException;
 import org.jruby.embed.ScriptingContainer;
 
 import org.jruby.embed.jsr223.JRubyEngineFactory;
+
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
@@ -49,7 +50,7 @@ public class Main
             props.put("java.class.path", classPath);
             System.setProperties(props);
 
-            if (type == "jsr" || type == "jsr233") {
+            if (type.equals("jsr") || type.equals("jsr233")) {
                 //  Invoke Ruby via JSR 233 (ScriptEngine)
                 ScriptEngineManager manager = new ScriptEngineManager();
 

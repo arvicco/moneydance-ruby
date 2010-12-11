@@ -5,14 +5,14 @@ CLEAN.include 'dist', 'build'
 CLOBBER.include 'doc'
 
 namespace :ant do
-  version = "2.2"
-  src = "src"
-  dist = "dist"
-  tmp = "tmp"
-  misc = "misc"
-  lib = "lib"
-  doc = "doc"
-  build = "build"
+  src = "src"     # Java sources directory
+  lib = "lib"     # Ruby sources directory
+  jars = "jars"   # Jar dependensies directory
+  doc = "doc"     # Javadocs directory
+  misc = "misc"   # Misc files directory
+  dist = "dist"   # Final product directory
+  build = "build" # Class files directory
+
   build_compiler = "classic"
   build_compiler_fulldepend = "true"
   privkeyfile = "#{misc}/priv_key"
@@ -30,9 +30,9 @@ namespace :ant do
     fileset :dir => build, :includes => "com/moneydance/modules/features/ruby/**"
   end
 
-  def classpath_with lib
+  def classpath_with jars
     classpath do
-      fileset :dir => lib, :includes => "*.jar"
+      fileset :dir => jars, :includes => "*.jar"
     end
   end
 
@@ -43,7 +43,7 @@ namespace :ant do
   desc 'Build the documentation'
   task :javadoc => doc do
     ant.javadoc :sourcefiles => FileList["#{src}/**/*.java"], :destdir => doc do
-      classpath_with lib
+      classpath_with jars
     end
   end
 
@@ -53,7 +53,7 @@ namespace :ant do
     ant.javac :srcdir => src, :destdir => build, :target =>"1.6",
               :debug => debug, :optimize => optimize,
               :includes => "com/moneydance/modules/features/ruby/**" do
-      classpath_with lib
+      classpath_with jars
     end
   end
 
@@ -61,13 +61,13 @@ namespace :ant do
   task :jar_bundle => [:compile, dist] do
     ant.jar :destfile => "#{dist}/ruby.mxt" do
       fileset_with src, build
-      zipfileset :src => "lib/jruby-complete.jar"
+      zipfileset :src => "jars/jruby-complete.jar"
     end
   end
 
   desc 'Update jar package (jruby-complete)'
   task :jar_update => [:compile, dist] do
-    ant.copy :file => "lib/jruby-complete.jar", :tofile => "#{dist}/jruby-complete.jar"
+    ant.copy :file => "jars/jruby-complete.jar", :tofile => "#{dist}/jruby-complete.jar"
     ant.jar :destfile => "#{dist}/jruby-complete.jar", :update => true do
       fileset_with src, build
     end
@@ -81,7 +81,7 @@ namespace :ant do
 #      ant.jar :destfile => "#{dist}/ruby.mxt", :manifest => "small.manifest" do
       fileset_with src, build
     end
-    ant.copy :file => "lib/jruby-complete.jar", :tofile => "#{dist}/jruby-complete.jar"
+    ant.copy :file => "jars/jruby-complete.jar", :tofile => "#{dist}/jruby-complete.jar"
   end
 
   # Fails on load with NullPointerException
@@ -89,7 +89,7 @@ namespace :ant do
   task :jar_shell => [:compile, dist] do
     # Extract jruby-complete so we can combine it with the app
     Dir.chdir(build) do
-      sh 'jar -xf ../lib/jruby-complete.jar'
+      sh 'jar -xf ../jars/jruby-complete.jar'
     end
     sh "jar -cfm #{dist}/ruby.mxt small.manifest -C #{build} ."
   end
@@ -98,7 +98,7 @@ namespace :ant do
   task :sign => :jar_update do
     ant.java :newenvironment => "true",
              :classname => "com.moneydance.admin.KeyAdmin" do
-      classpath_with lib
+      classpath_with jars
       arg :value => "signextjar"
       arg :value => privkeyfile
       arg :value => privkeyid
@@ -111,7 +111,7 @@ namespace :ant do
   desc 'Generate keys'
   task :genkeys do
     ant.java :classname => "com.moneydance.admin.KeyAdmin" do
-      classpath_with lib
+      classpath_with jars
       arg :value => "genkey"
       arg :value => privkeyfile
       arg :value => pubkeyfile
