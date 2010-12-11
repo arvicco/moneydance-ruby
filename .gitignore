@@ -1,0 +1,8 @@
+*.gem
+*.rbc
+~*
+#*
+doc
+pkg
+build
+dist

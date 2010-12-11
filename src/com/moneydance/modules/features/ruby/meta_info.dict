@@ -1,0 +1,8 @@
+{
+  "vendor" = "Arvicco"
+  "module_build" = "1"
+  "vendor.url" = "http://github.com/arvicco/moneydance-ruby/"
+  "module_name" = "Ruby scripting"
+  "module_desc" = "<html><body><title>Ruby scripting</title><p>Ruby scripting for Moneydance.</p></body></html>"
+  "desc" = "Ruby scripting for Moneydance."
+}
