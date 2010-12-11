@@ -10,7 +10,7 @@ namespace :ant do
   dist = "dist"
   tmp = "tmp"
   misc = "misc"
-  lib = "lib" # !!! lib is considered a method in classpath_with_jars... Why?
+  lib = "lib"
   doc = "doc"
   build = "build"
   build_compiler = "classic"
@@ -21,9 +21,18 @@ namespace :ant do
   debug = "on"
   optimize = "off"
 
-  def classpath_with_jars
+  def fileset_with src, build
+    fileset :dir => src, :includes =>
+        "com/moneydance/modules/features/ruby/meta_info.dict,
+             com/moneydance/modules/features/ruby/*.gif,
+             com/moneydance/modules/features/ruby/*.jpg,
+             com/moneydance/modules/features/ruby/*.jpeg"
+    fileset :dir => build, :includes => "com/moneydance/modules/features/ruby/**"
+  end
+
+  def classpath_with lib
     classpath do
-      fileset :dir => "lib", :includes => "*.jar"
+      fileset :dir => lib, :includes => "*.jar"
     end
   end
 
@@ -34,7 +43,7 @@ namespace :ant do
   desc 'Build the documentation'
   task :javadoc => doc do
     ant.javadoc :sourcefiles => FileList["#{src}/**/*.java"], :destdir => doc do
-      classpath_with_jars
+      classpath_with lib
     end
   end
 
@@ -44,19 +53,14 @@ namespace :ant do
     ant.javac :srcdir => src, :destdir => build, :target =>"1.6",
               :debug => debug, :optimize => optimize,
               :includes => "com/moneydance/modules/features/ruby/**" do
-      classpath_with_jars
+      classpath_with lib
     end
   end
 
   desc 'Build jar package (jruby-complete bundled)'
   task :jar_bundle => [:compile, dist] do
     ant.jar :destfile => "#{dist}/ruby.mxt" do
-      fileset :dir => src, :includes =>
-              "com/moneydance/modules/features/ruby/meta_info.dict,
-               com/moneydance/modules/features/ruby/*.gif,
-               com/moneydance/modules/features/ruby/*.jpg,
-               com/moneydance/modules/features/ruby/*.jpeg"
-      fileset :dir => build, :includes => "com/moneydance/modules/features/ruby/**"
+      fileset_with src, build
       zipfileset :src => "lib/jruby-complete.jar"
     end
   end
@@ -65,12 +69,7 @@ namespace :ant do
   task :jar_update => [:compile, dist] do
     ant.copy :file => "lib/jruby-complete.jar", :tofile => "#{dist}/jruby-complete.jar"
     ant.jar :destfile => "#{dist}/jruby-complete.jar", :update => true do
-      fileset :dir => src, :includes =>
-              "com/moneydance/modules/features/ruby/meta_info.dict,
-               com/moneydance/modules/features/ruby/*.gif,
-               com/moneydance/modules/features/ruby/*.jpg,
-               com/moneydance/modules/features/ruby/*.jpeg"
-      fileset :dir => build, :includes => "com/moneydance/modules/features/ruby/**"
+      fileset_with src, build
     end
     ant.move :file => "#{dist}/jruby-complete.jar", :tofile => "#{dist}/ruby.mxt"
   end
@@ -80,12 +79,7 @@ namespace :ant do
   task :jar_separate => [:compile, dist] do
     ant.jar :destfile => "#{dist}/ruby.mxt" do
 #      ant.jar :destfile => "#{dist}/ruby.mxt", :manifest => "small.manifest" do
-      fileset :dir => src, :includes =>
-              "com/moneydance/modules/features/ruby/meta_info.dict,
-               com/moneydance/modules/features/ruby/*.gif,
-               com/moneydance/modules/features/ruby/*.jpg,
-               com/moneydance/modules/features/ruby/*.jpeg"
-      fileset :dir => build, :includes => "com/moneydance/modules/features/ruby/**"
+      fileset_with src, build
     end
     ant.copy :file => "lib/jruby-complete.jar", :tofile => "#{dist}/jruby-complete.jar"
   end
@@ -104,7 +98,7 @@ namespace :ant do
   task :sign => :jar_update do
     ant.java :newenvironment => "true",
              :classname => "com.moneydance.admin.KeyAdmin" do
-      classpath_with_jars
+      classpath_with lib
       arg :value => "signextjar"
       arg :value => privkeyfile
       arg :value => privkeyid
@@ -117,7 +111,7 @@ namespace :ant do
   desc 'Generate keys'
   task :genkeys do
     ant.java :classname => "com.moneydance.admin.KeyAdmin" do
-      classpath_with_jars
+      classpath_with lib
       arg :value => "genkey"
       arg :value => privkeyfile
       arg :value => pubkeyfile
