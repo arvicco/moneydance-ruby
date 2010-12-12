@@ -5,12 +5,15 @@ CLEAN.include 'dist', 'build'
 CLOBBER.include 'doc'
 
 namespace :ant do
-  src = "src"     # Java sources directory
-  lib = "lib"     # Ruby sources directory
-  jars = "jars"   # Jar dependensies directory
-  doc = "doc"     # Javadocs directory
-  misc = "misc"   # Misc files directory
-  dist = "dist"   # Final product directory
+  md_dir =  "#{ENV["HOME"]}/.moneydance" # Moneydance user directory
+  features = "#{md_dir}/fmodules/" # Features directory
+
+  src = "src" # Java sources directory
+  lib = "lib" # Ruby sources directory
+  jars = "jars" # Jar dependensies directory
+  doc = "doc" # Javadocs directory
+  misc = "misc" # Misc files directory
+  dist = "dist" # Final product directory
   build = "build" # Class files directory
 
   build_compiler = "classic"
@@ -20,6 +23,11 @@ namespace :ant do
   privkeyid = "99"
   debug = "on"
   optimize = "off"
+
+  # TODO: OSX-specific, need to generalize
+  md_command = "/Applications/Moneydance.app/Contents/MacOS/JavaApplicationStub " +
+      "-invoke_and_quit moneydance:fmodule:ruby:showconsole" #runfile?=networth.py"
+  tail_command = "iterm tail -f #{md_dir}/errlog.txt"
 
   def fileset_with src, build
     fileset :dir => src, :includes =>
@@ -106,6 +114,17 @@ namespace :ant do
       arg :line => "#{dist}/ruby.mxt"
     end
     ant.move :file => "s-ruby.mxt", :tofile => "#{dist}/ruby.mxt"
+  end
+
+  desc 'Load extension package into Moneydance'
+  task :load => :jar_update do
+    ant.copy :file => "#{dist}/ruby.mxt", :tofile => "#{features}/ruby.mxt"
+    sh "#{md_command}"
+  end
+
+  desc 'Start tracking Moneydance errors'
+  task :tail do
+    sh "#{tail_command}"
   end
 
   desc 'Generate keys'

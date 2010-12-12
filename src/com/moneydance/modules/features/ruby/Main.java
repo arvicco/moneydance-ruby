@@ -2,7 +2,13 @@ package com.moneydance.modules.features.ruby;
 
 import com.moneydance.apps.md.controller.*;
 import com.moneydance.apps.md.model.*;
+import org.jruby.embed.ScriptingContainer;
+import org.jruby.embed.jsr223.JRubyEngineFactory;
 
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
 import java.io.*;
 import java.util.*;
 import java.text.*;
@@ -28,6 +34,15 @@ public class Main
         FeatureModuleContext context = getContext();
         try {
             ruby = new RubyEngine(this);
+            System.err.println("eval: " + ruby.eval("'Hello from outside Ruby!'"));
+            ruby.eval("puts 'Hello from Ruby!'");
+            ruby.eval("STDERR.puts 'Hello from Ruby STDERR!'");
+            ruby.eval("$LOAD_PATH << 'lib'");
+            ruby.eval("STDERR.puts $LOAD_PATH");
+            ruby.eval("require 'console'");
+
+            Object archive = ruby.eval("Console.new");
+
             context.registerFeature(this, "showconsole",
                     getIcon("accountlist"),
                     getName());
@@ -59,9 +74,11 @@ public class Main
     }
 
     /**
-     * Process an invokation of this module with the given URI
+     * Process an invocation of this module with the given URI
      */
     public void invoke(String uri) {
+        System.err.println("ERR JRuby invoke");
+        System.out.println("OUT JRuby invoke");
         String command = uri;
         String parameters = "";
         int theIdx = uri.indexOf('?');
