@@ -39,6 +39,8 @@ public class Main
             ruby.eval("STDERR.puts 'Hello from Ruby STDERR!'");
             ruby.eval("$LOAD_PATH << 'lib'");
             ruby.eval("STDERR.puts $LOAD_PATH");
+            ruby.eval("require 'irb'");
+            ruby.eval("require 'java'");
             ruby.eval("require 'console'");
 
             Object archive = ruby.eval("Console.new");
