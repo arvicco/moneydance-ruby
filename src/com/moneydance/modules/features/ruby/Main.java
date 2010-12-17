@@ -27,6 +27,7 @@ public class Main
     public static void main(String[] args) {
         Main ext = new Main();
         ext.init();
+        ext.showConsole();
     }
 
     public void init() {
@@ -41,9 +42,9 @@ public class Main
             ruby.eval("STDERR.puts $LOAD_PATH");
             ruby.eval("require 'irb'");
             ruby.eval("require 'java'");
-            ruby.eval("require 'console'");
 
-            Object archive = ruby.eval("Console.new");
+//            ruby.eval("require 'console'");
+//            Object archive = ruby.eval("Console.new");
 
             context.registerFeature(this, "showconsole",
                     getIcon("accountlist"),
@@ -103,15 +104,18 @@ public class Main
         return "Ruby Interface";
     }
 
+    /**
+     * Shows IRB console
+     */
     private synchronized void showConsole() {
-        if (accountListWindow == null) {
-            accountListWindow = new AccountListWindow(this);
-            accountListWindow.setVisible(true);
-        } else {
-            accountListWindow.setVisible(true);
-            accountListWindow.toFront();
-            accountListWindow.requestFocus();
+        ConsoleThread t = new ConsoleThread();
+        try {
+            t.start();
+            t.join();  // Only works for `rake ant:load` session, need to remove for Swing
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
         }
+
     }
 
     FeatureModuleContext getUnprotectedContext() {
@@ -123,6 +127,33 @@ public class Main
             accountListWindow.goAway();
             accountListWindow = null;
             System.gc();
+        }
+    }
+
+    public class ConsoleThread extends Thread {
+
+        public void run() {
+            System.out.println("Hello from a thread!");
+            String jrubybin = ruby.home + "/bin";
+            String jirb_swing = jrubybin + "/jirb_swing";
+            ruby.eval("$LOAD_PATH << '" + jrubybin + "'");
+            ruby.eval("puts $LOAD_PATH");
+//            ruby.eval("ARGV << '--noreadline' << '--prompt' << 'inf-ruby'");
+            ruby.eval("ARGV << '--prompt' << 'inf-ruby'");
+            ruby.container.put("$md", getContext().getRootAccount()); // LocalVariableBehavior.PERSISTENT
+            ruby.container.put("MD", getContext().getRootAccount()); // LocalVariableBehavior.PERSISTENT
+            ruby.eval("p $md");
+
+
+            ruby.eval("load 'jirb_swing'", jirb_swing);
+//        if (accountListWindow == null) {
+//            accountListWindow = new AccountListWindow(this);
+//            accountListWindow.setVisible(true);
+//        } else {
+//            accountListWindow.setVisible(true);
+//            accountListWindow.toFront();
+//            accountListWindow.requestFocus();
+//        }
         }
     }
 }

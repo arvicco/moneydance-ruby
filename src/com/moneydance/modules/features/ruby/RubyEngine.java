@@ -12,12 +12,15 @@ import java.io.File;
 import java.io.IOException;
 
 /**
- *
+ * Wrapper around Ruby Scripting Engine or Container exposing unified interface.
  */
 public class RubyEngine {
     private static String RubyType = "jsra";
-    private Object ruby = null;
     private Main extension = null;
+    public ScriptEngine engine = null;
+    public Invocable invocable = null;
+    public ScriptingContainer container = null;
+    public String home = null;
 
     public static void main(String[] args) throws ScriptException, IOException {
         RubyEngine ext = new RubyEngine(new Main());
@@ -26,26 +29,23 @@ public class RubyEngine {
     public RubyEngine(Main extension) {
         this.extension = extension;
         try {
-            // Set up jruby-complete.jar and System path to it
+            // Set up jruby-complete.jar in Moneydance features dir
             File featureDir = Common.getFeatureModulesDirectory();
             File rubyJar = new File(featureDir, "jruby-complete.jar");
-            if (!rubyJar.exists()) {
-                File rubyMxt = new File(featureDir, "ruby.mxt");
-                Util.copyFile(rubyMxt, rubyJar);
-            }
+            File rubyMxt = new File(featureDir, "ruby.mxt");
+            Util.copyFile(rubyMxt, rubyJar);
 
+            // Add System path to jruby-complete.jar
             String path = System.getProperty("java.class.path");
             path += File.pathSeparator + rubyJar.getCanonicalPath();
             System.setProperty("java.class.path", path);
             System.err.println("classpath: " + System.getProperty("java.class.path"));
 
-            String jrubyhome = "file:" + rubyJar.getCanonicalPath() + "!/META-INF/jruby.home";
-            String jrubybin = "file:" + rubyJar.getCanonicalPath() + "!/META-INF/jruby.home/bin";
-            String jirb_swing = jrubyhome + "/bin/jirb_swing";
-            System.setProperty("jruby.home", jrubyhome);
+            //Set up jruby.home
+            home = "file:" + rubyJar.getCanonicalPath() + "!/META-INF/jruby.home";
+            System.setProperty("jruby.home", home);
 
             if (RubyType.equals("jsr") || RubyType.equals("jsr233")) {
-
 //                System.setProperty("org.jruby.embed.localcontext.scope", "singlethread");
 //                classPath = System.getProperty("org.jruby.embed.class.path");
 //                System.out.println("rubyJar: " + rubyJar.getCanonicalPath());
@@ -55,28 +55,23 @@ public class RubyEngine {
 
                 // Initialize Ruby as JSR 233 (ScriptEngine)
                 ScriptEngineFactory factory = (ScriptEngineFactory) new JRubyEngineFactory();
-                ruby = factory.getScriptEngine();
-                Invocable invocable = (Invocable) ruby;
+                engine = factory.getScriptEngine();
+                invocable = (Invocable) engine;
 
-                System.err.println("context: " + ((ScriptEngine) ruby).getContext());
+                System.err.println("context: " + engine.getContext());
             } else {
                 // Initialize Ruby as RedBridge (ScriptingContainer)
-                ScriptingContainer ruby = new ScriptingContainer();// LocalContextScope.SINGLETHREAD);
-                ruby.setClassLoader(ruby.getClass().getClassLoader());
+                container = new ScriptingContainer();// LocalContextScope.SINGLETHREAD);
 
-                this.ruby = ruby;
-                System.err.println("jrubyhome: " + ruby.getHomeDirectory());
-//                jrubyhome = ruby.getHomeDirectory();
+                // Assign classloader since MD loader causes path problems
+                container.setClassLoader(container.getClass().getClassLoader());
+
+                System.err.println("jrubyhome: " + container.getHomeDirectory());
+//                jrubyhome = container.getHomeDirectory();
 //                String[] paths = {jrubyhome + "/bin"};
-//                ruby.setLoadPaths(Arrays.asList(paths));       // add "bin" directory to $LOAD_PATH
-//                ruby.setLoadPaths(Arrays.asList(new String[]{"lib"}));
+//                container.setLoadPaths(Arrays.asList(paths));       // add "bin" directory to $LOAD_PATH
+//                container.setLoadPaths(Arrays.asList(new String[]{"lib"}));
             }
-
-            System.err.println("ruby: " + ruby);
-            eval("$LOAD_PATH << '" + jrubybin + "'");
-            eval("puts $LOAD_PATH");
-            eval("load 'jirb_swing'", jirb_swing);
-
         } catch (Exception e) {
             e.printStackTrace(System.err);
             System.err.println("Caught exception during JRuby init");
@@ -99,13 +94,13 @@ public class RubyEngine {
 
             if (RubyType.equals("jsr") || RubyType.equals("jsr233")) {
                 //  Invoke Ruby via JSR 233 (ScriptEngine)
-                ((ScriptEngine) ruby).getContext().setAttribute(
+                engine.getContext().setAttribute(
                         ScriptEngine.FILENAME, scriptName, ScriptContext.ENGINE_SCOPE);
-                result = ((ScriptEngine) ruby).eval(script);
+                result = engine.eval(script);
             } else {
                 // Invoke Ruby via RedBridge (ScriptingContainer)
-                ((ScriptingContainer) ruby).setScriptFilename(scriptName);
-                result = ((ScriptingContainer) ruby).runScriptlet(script);
+                container.setScriptFilename(scriptName);
+                result = container.runScriptlet(script);
             }
             return result;
         } catch (ScriptException e) {
@@ -120,26 +115,9 @@ public class RubyEngine {
      *
      * @param script The script language source to be executed.
      * @return The value returned from the execution of the script.
-     * @throws NullPointerException         if the argument is null.
-     * @throws javax.script.ScriptException if error occurs in script.
+     * @throws NullPointerException if the argument is null.
      */
     public Object eval(String script) {
-        Object result;
-        try {
-            System.err.println("ruby evals: " + script);
-
-            if (RubyType.equals("jsr") || RubyType.equals("jsr233")) {
-                //  Invoke Ruby via JSR 233 (ScriptEngine)
-                result = ((ScriptEngine) ruby).eval(script);
-            } else {
-                // Invoke Ruby via RedBridge (ScriptingContainer)
-                result = ((ScriptingContainer) ruby).runScriptlet(script);
-            }
-            return result;
-        } catch (ScriptException e) {
-            e.printStackTrace(System.err);
-            System.err.println("Caught exception during JRuby eval");
-            return null;
-        }
+        return eval(script, "script");
     }
 }
