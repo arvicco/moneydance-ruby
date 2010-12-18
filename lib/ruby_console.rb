@@ -3,7 +3,7 @@ require 'irb'
 require 'irb/completion'
 
 #java_require 'moneydance_irb'  # Require this file, instead of pasting code into .java
-java_package 'com.moneydance.modules.features.ruby'
+java_package 'com.moneydance.modules.features.ruby.rb'
 
 # Moneydance IRB Console
 class RubyConsole

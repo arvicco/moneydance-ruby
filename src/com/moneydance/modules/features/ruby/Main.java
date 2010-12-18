@@ -14,6 +14,9 @@ import java.util.*;
 import java.text.*;
 import java.awt.*;
 
+// Imports compiled Ruby code
+import com.moneydance.modules.features.ruby.rb.*;
+
 /**
  * Pluggable Moneydance module used to give users access to Ruby scripting interface.
  */

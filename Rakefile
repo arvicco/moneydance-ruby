@@ -1,7 +1,7 @@
 require 'rake/clean'
 require 'ant'
 
-CLEAN.include 'dist', 'build'
+CLEAN.include 'dist', 'build', 'src/**/rb' # Clean all compiled Ruby sources
 CLOBBER.include 'doc'
 
 namespace :ant do
