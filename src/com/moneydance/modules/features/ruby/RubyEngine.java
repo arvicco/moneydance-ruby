@@ -61,7 +61,7 @@ public class RubyEngine {
                 System.err.println("context: " + engine.getContext());
             } else {
                 // Initialize Ruby as RedBridge (ScriptingContainer)
-                container = new ScriptingContainer();// LocalContextScope.SINGLETHREAD);
+                container = new ScriptingContainer(LocalContextScope.THREADSAFE);// LocalContextScope.SINGLETHREAD);
 
                 // Assign classloader since MD loader causes path problems
                 container.setClassLoader(container.getClass().getClassLoader());

@@ -24,7 +24,7 @@ import com.moneydance.modules.features.ruby.rb.*;
 public class Main
         extends FeatureModule {
 
-    private AccountListWindow accountListWindow = null;
+    private RubyConsole rubyConsole = null;
     private RubyEngine ruby = null;
 
     public static void main(String[] args) {
@@ -38,16 +38,8 @@ public class Main
         FeatureModuleContext context = getContext();
         try {
             ruby = new RubyEngine(this);
-            System.err.println("eval: " + ruby.eval("'Hello from outside Ruby!'"));
             ruby.eval("puts 'Hello from Ruby!'");
-            ruby.eval("STDERR.puts 'Hello from Ruby STDERR!'");
             ruby.eval("$LOAD_PATH << 'lib'");
-            ruby.eval("STDERR.puts $LOAD_PATH");
-            ruby.eval("require 'irb'");
-            ruby.eval("require 'java'");
-
-//            ruby.eval("require 'console'");
-//            Object archive = ruby.eval("Console.new");
 
             context.registerFeature(this, "showconsole",
                     getIcon("accountlist"),
@@ -58,8 +50,13 @@ public class Main
     }
 
     public void cleanup() {
-        closeConsole();
+        if (rubyConsole != null) {
+            rubyConsole.dispose();
+            rubyConsole = null;
+            System.gc();
+        }
     }
+//    synchronized void closeConsole() {
 
     private Image getIcon(String action) {
         try {
@@ -83,8 +80,6 @@ public class Main
      * Process an invocation of this module with the given URI
      */
     public void invoke(String uri) {
-        System.err.println("ERR JRuby invoke");
-        System.out.println("OUT JRuby invoke");
         String command = uri;
         String parameters = "";
         int theIdx = uri.indexOf('?');
@@ -108,58 +103,28 @@ public class Main
     }
 
     /**
-     * Shows IRB console
+     * Shows Moneydance IRB console
      */
     private synchronized void showConsole() {
-        ConsoleThread t = new ConsoleThread();
-        try {
-            t.start();
-            if (!EventQueue.isDispatchThread()) {
-                System.out.println("Will join!");
-               // Only join in `rake ant:load` session, not inside Moneydance GUI
-               t.join();
-            }
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-        }
 
+        if (rubyConsole == null) {
+            rubyConsole = new RubyConsole(this, getContext());
+            Thread t = new Thread((Runnable) rubyConsole);
+            t.start();
+            try {
+                if (!EventQueue.isDispatchThread()) {
+                    // Only join in `rake ant:load` session, not inside Moneydance GUI
+                    t.join();
+                }
+            } catch (Exception e) {
+                e.printStackTrace(System.err);
+            }
+        } else {
+            rubyConsole.show();
+        }
     }
 
     FeatureModuleContext getUnprotectedContext() {
         return getContext();
-    }
-
-    synchronized void closeConsole() {
-        if (accountListWindow != null) {
-            accountListWindow.goAway();
-            accountListWindow = null;
-            System.gc();
-        }
-    }
-
-    public class ConsoleThread extends Thread {
-
-        public void run() {
-            System.out.println("Hello from a thread!");
-//            String jrubybin = ruby.home + "/bin";
-//            String jirb_swing = jrubybin + "/jirb_swing";
-//            ruby.eval("$LOAD_PATH << '" + jrubybin + "'");
-//            ruby.eval("puts $LOAD_PATH");
-//            ruby.eval("ARGV << '--noreadline' << '--prompt' << 'inf-ruby'");
-//            ruby.eval("ARGV << '--prompt' << 'inf-ruby'");
-            ruby.container.put("$md", getContext().getRootAccount()); // LocalVariableBehavior.PERSISTENT
-            ruby.container.put("MD", getContext().getRootAccount()); // LocalVariableBehavior.PERSISTENT
-            ruby.eval("p $md");
-
-            RubyConsole.noop();
-//            ruby.eval("load 'jirb_swing'", jirb_swing);
-//        if (accountListWindow == null) {
-//            accountListWindow = new AccountListWindow(this);
-//        } else {
-//            accountListWindow.setVisible(true);
-//            accountListWindow.toFront();
-//            accountListWindow.requestFocus();
-//        }
-        }
     }
 }
