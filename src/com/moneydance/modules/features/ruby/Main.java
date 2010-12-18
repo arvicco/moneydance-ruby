@@ -111,7 +111,11 @@ public class Main
         ConsoleThread t = new ConsoleThread();
         try {
             t.start();
-            t.join();  // Only works for `rake ant:load` session, need to remove for Swing
+            if (!EventQueue.isDispatchThread()) {
+                System.out.println("Will join!");
+               // Only join in `rake ant:load` session, not inside Moneydance GUI
+               t.join();
+            }
         } catch (Exception e) {
             e.printStackTrace(System.err);
         }
@@ -134,21 +138,20 @@ public class Main
 
         public void run() {
             System.out.println("Hello from a thread!");
-            String jrubybin = ruby.home + "/bin";
-            String jirb_swing = jrubybin + "/jirb_swing";
-            ruby.eval("$LOAD_PATH << '" + jrubybin + "'");
-            ruby.eval("puts $LOAD_PATH");
+//            String jrubybin = ruby.home + "/bin";
+//            String jirb_swing = jrubybin + "/jirb_swing";
+//            ruby.eval("$LOAD_PATH << '" + jrubybin + "'");
+//            ruby.eval("puts $LOAD_PATH");
 //            ruby.eval("ARGV << '--noreadline' << '--prompt' << 'inf-ruby'");
-            ruby.eval("ARGV << '--prompt' << 'inf-ruby'");
+//            ruby.eval("ARGV << '--prompt' << 'inf-ruby'");
             ruby.container.put("$md", getContext().getRootAccount()); // LocalVariableBehavior.PERSISTENT
             ruby.container.put("MD", getContext().getRootAccount()); // LocalVariableBehavior.PERSISTENT
             ruby.eval("p $md");
 
-
-            ruby.eval("load 'jirb_swing'", jirb_swing);
+            RubyConsole.noop();
+//            ruby.eval("load 'jirb_swing'", jirb_swing);
 //        if (accountListWindow == null) {
 //            accountListWindow = new AccountListWindow(this);
-//            accountListWindow.setVisible(true);
 //        } else {
 //            accountListWindow.setVisible(true);
 //            accountListWindow.toFront();

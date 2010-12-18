@@ -1,165 +1,158 @@
-/************************************************************\
- *      Copyright (C) 2008 Reilly Technologies, L.L.C.      *
- \************************************************************/
-
 package com.moneydance.modules.features.ruby;
 
-import com.moneydance.awt.*;
-import com.moneydance.apps.md.controller.Common;
-import com.moneydance.apps.md.controller.Util;
+import org.jruby.Ruby;
+import org.jruby.RubyObject;
+import org.jruby.javasupport.util.RuntimeHelpers;
+import org.jruby.runtime.builtin.IRubyObject;
+import org.jruby.javasupport.JavaUtil;
+import org.jruby.RubyClass;
 
-import java.io.*;
-import java.util.*;
-import javax.swing.*;
-import java.text.*;
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.border.*;
 
-/**
- * Window used for Ruby interface
- */
+public class RubyConsole extends RubyObject  {
+    private static final Ruby __ruby__ = Ruby.getGlobalRuntime();
+    private static final RubyClass __metaclass__;
 
-public class RubyConsole
-        extends JFrame
-        implements ActionListener {
-    private Main extension;
-    private JTextArea rubyArea;
-    private JTextField inputArea;
-    private JButton clearButton;
-    private JButton closeButton;
-    private JButton readFile;
-    private RubyEngine ruby;
-
-    public RubyConsole(Main extension, RubyEngine ruby) {
-        super("Ruby Console");
-        this.extension = extension;
-        this.ruby = ruby;
-
-        rubyArea = new JTextArea();
-        rubyArea.setEditable(false);
-        inputArea = new JTextField();
-        inputArea.setEditable(true);
-        clearButton = new JButton("Clear");
-        closeButton = new JButton("Close");
-        readFile = new JButton("File");
-
-        JPanel p = new JPanel(new GridBagLayout());
-        p.setBorder(new EmptyBorder(10, 10, 10, 10));
-        p.add(new JScrollPane(rubyArea), AwtUtil.getConstraints(0, 0, 1, 1, 4, 1, true, true));
-        p.add(inputArea, AwtUtil.getConstraints(0, 1, 1, 0, 5, 1, true, true));
-        p.add(Box.createVerticalStrut(8), AwtUtil.getConstraints(0, 2, 0, 0, 1, 1, false, false));
-        p.add(clearButton, AwtUtil.getConstraints(0, 3, 1, 0, 1, 1, false, true));
-        p.add(closeButton, AwtUtil.getConstraints(1, 3, 1, 0, 1, 1, false, true));
-        p.add(new JLabel(""), AwtUtil.getConstraints(2, 3, 1, 0, 1, 1, true, true));
-        p.add(readFile, AwtUtil.getConstraints(3, 3, 1, 0, 1, 1, false, true));
-        getContentPane().add(p);
-
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        enableEvents(WindowEvent.WINDOW_CLOSING);
-        closeButton.addActionListener(this);
-        clearButton.addActionListener(this);
-        readFile.addActionListener(this);
-        inputArea.addActionListener(this);
-
-        //Redirect System.out to the rubyArea
-        PrintStream c = new PrintStream(new ConsoleStream());
-
-        //Instantiate the interpreter.
-//        interpreter = new InteractiveConsole();
-//        interpreter.setOut(c);
-//        interpreter.setErr(c);
-//
-//        //Give it the context
-//        interpreter.set("moneydance", extension.getUnprotectedContext());
-
-        pack();
-        setSize(500, 400);
-        AwtUtil.centerWindow(this);
+    static {
+        String source = new StringBuilder("require 'jruby'\n" +
+            "require 'irb'\n" +
+            "require 'irb/completion'\n" +
+            "\n" +
+            "#java_require 'moneydance_irb'  # Require this file, instead of pasting code into .java\n" +
+            "java_package 'com.moneydance.modules.features.ruby'\n" +
+            "\n" +
+            "# Moneydance IRB Console\n" +
+            "class RubyConsole\n" +
+            "\n" +
+            "  if ARGV.empty?\n" +
+            "    # default options, esp. useful for jrubyw\n" +
+            "    ARGV << '--readline' << '--prompt' << 'inf-ruby'\n" +
+            "  end\n" +
+            "\n" +
+            "  import java.awt.Color\n" +
+            "  import java.awt.Font\n" +
+            "  import javax.swing.JFrame\n" +
+            "  import java.awt.EventQueue\n" +
+            "\n" +
+            "  # Dummy static method\n" +
+            "  def self.noop\n" +
+            "\n" +
+            "  end\n" +
+            "\n" +
+            "# Try to find preferred font family, use otherwise -- err --  otherwise\n" +
+            "  def self.find_font(otherwise, style, size, *families)\n" +
+            "    avail_families = java.awt.GraphicsEnvironment.local_graphics_environment.available_font_family_names\n" +
+            "    fontname = families.find(proc { otherwise }) { |name| avail_families.include? name }\n" +
+            "    Font.new(fontname, style, size)\n" +
+            "  end\n" +
+            "\n" +
+            "  text = javax.swing.JTextPane.new\n" +
+            "  text.font = find_font('Monospaced', Font::PLAIN, 14, 'Monaco', 'Andale Mono')\n" +
+            "  text.margin = java.awt.Insets.new(8, 8, 8, 8)\n" +
+            "  text.caret_color = Color.new(0xa4, 0x00, 0x00)\n" +
+            "  text.background = Color.new(0xf2, 0xf2, 0xf2)\n" +
+            "  text.foreground = Color.new(0xa4, 0x00, 0x00)\n" +
+            "\n" +
+            "  pane = javax.swing.JScrollPane.new\n" +
+            "  pane.viewport_view = text\n" +
+            "  frame = JFrame.new('Moneydance Interactive Ruby Console (tab will autocomplete)')\n" +
+            "#  frame.default_close_operation = JFrame::EXIT_ON_CLOSE\n" +
+            "#  frame.default_close_operation = JFrame::DISPOSE_ON_CLOSE\n" +
+            "  frame.default_close_operation = JFrame::HIDE_ON_CLOSE\n" +
+            "\n" +
+            "#  frame.addWindowListener(WindowAdapter.new {\n" +
+            "#public void windowClosing(WindowEvent e) {\n" +
+            "#System.exit(0);\n" +
+            "#}\n" +
+            "#});\n" +
+            "  frame.set_size(700, 600)\n" +
+            "  frame.content_pane.add(pane)\n" +
+            "  tar = org.jruby.demo.TextAreaReadline.new(text,\n" +
+            "                                            \" Welcome to the Moneydance IRB Console [#{JRUBY_VERSION}] \\n\\n\")\n" +
+            "  JRuby.objectspace = true # useful for code completion\n" +
+            "  tar.hook_into_runtime_with_streams(JRuby.runtime)\n" +
+            "\n" +
+            "  EventQueue.invoke_later proc { frame.visible = true; STDOUT.puts \"SVisible...\"; sleep 1 }\n" +
+            "\n" +
+            "  IRB.start(__FILE__)\n" +
+            "\n" +
+            "  STDOUT.puts \"IRB finished...\"\n" +
+            "\n" +
+            "  def dispose\n" +
+            "    STDOUT.puts \"Disposing...\"\n" +
+            "    frame.dispose\n" +
+            "    STDOUT.puts \"Disposed...\"\n" +
+            "  end\n" +
+            "end\n" +
+            "").toString();
+        __ruby__.executeScript(source, "lib/ruby_console.rb");
+        RubyClass metaclass = __ruby__.getClass("RubyConsole");
+        metaclass.setRubyStaticAllocator(RubyConsole.class);
+        if (metaclass == null) throw new NoClassDefFoundError("Could not load Ruby class: RubyConsole");
+        __metaclass__ = metaclass;
     }
 
-    public void actionPerformed(ActionEvent evt) {
-        Object src = evt.getSource();
-        if (src == closeButton) {
-            extension.closeConsole();
-        }
-        if (src == clearButton) {
-            rubyArea.setText("");
-        }
-        if (src == inputArea) {
-            processInputCommand();
-        }
-        if (src == readFile) {
-            addLine("\n");
-            readAFile();
-            addLine(">> ");
-        }
+    /**
+     * Standard Ruby object constructor, for construction-from-Ruby purposes.
+     * Generally not for user consumption.
+     *
+     * @param ruby The JRuby instance this object will belong to
+     * @param metaclass The RubyClass representing the Ruby class of this object
+     */
+    private RubyConsole(Ruby ruby, RubyClass metaclass) {
+        super(ruby, metaclass);
     }
 
-    private void readAFile() {
-//        JFileChooser fc = new JFileChooser();
-//        fc.setDialogTitle("Choose Ruby File");
-//        int returnVal = fc.showOpenDialog(this);
-//        if (returnVal == JFileChooser.APPROVE_OPTION) {
-//            extension.runFile(fc.getSelectedFile(), ruby);
-//        }
+    /**
+     * A static method used by JRuby for allocating instances of this object
+     * from Ruby. Generally not for user comsumption.
+     *
+     * @param ruby The JRuby instance this object will belong to
+     * @param metaclass The RubyClass representing the Ruby class of this object
+     */
+    public static IRubyObject __allocate__(Ruby ruby, RubyClass metaClass) {
+        return new RubyConsole(ruby, metaClass);
+    }
+        
+    /**
+     * Default constructor. Invokes this(Ruby, RubyClass) with the classloader-static
+     * Ruby and RubyClass instances assocated with this class, and then invokes the
+     * no-argument 'initialize' method in Ruby.
+     *
+     * @param ruby The JRuby instance this object will belong to
+     * @param metaclass The RubyClass representing the Ruby class of this object
+     */
+    public RubyConsole() {
+        this(__ruby__, __metaclass__);
+        RuntimeHelpers.invoke(__ruby__.getCurrentContext(), this, "initialize");
     }
 
-    private void processInputCommand() {
-        String command = inputArea.getText();
-        inputArea.setText("");
-        addLine(command + "\n");
-        executeRubyStatement(command);
+    
+    public static Object noop() {
+
+        IRubyObject ruby_result = RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __metaclass__, "noop");
+        return (Object)ruby_result.toJava(Object.class);
+
     }
 
-    public void executeRubyStatement(String command) {
-        ruby.eval(command);
-//        if (interpreter.push(command))
-//            addLine("... ");
-//        else
-            addLine(">> ");
+    
+    public static Object find_font(Object otherwise, Object style, Object size, Object families) {
+        IRubyObject ruby_args[] = new IRubyObject[4];
+        ruby_args[0] = JavaUtil.convertJavaToRuby(__ruby__, otherwise);
+        ruby_args[1] = JavaUtil.convertJavaToRuby(__ruby__, style);
+        ruby_args[2] = JavaUtil.convertJavaToRuby(__ruby__, size);
+        ruby_args[3] = JavaUtil.convertJavaToRuby(__ruby__, families);
+
+        IRubyObject ruby_result = RuntimeHelpers.invoke(__ruby__.getCurrentContext(), __metaclass__, "find_font", ruby_args);
+        return (Object)ruby_result.toJava(Object.class);
+
     }
 
-    public final void processEvent(AWTEvent evt) {
-        if (evt.getID() == WindowEvent.WINDOW_CLOSING) {
-            extension.closeConsole();
-            return;
-        }
-        if (evt.getID() == WindowEvent.WINDOW_OPENED) {
-            addLine(">>> ");
-            inputArea.requestFocus();
-        }
-        super.processEvent(evt);
+    
+    public Object dispose() {
+
+        IRubyObject ruby_result = RuntimeHelpers.invoke(__ruby__.getCurrentContext(), this, "dispose");
+        return (Object)ruby_result.toJava(Object.class);
+
     }
 
-    void goAway() {
-        setVisible(false);
-        dispose();
-    }
-
-    private class ConsoleStream
-            extends OutputStream
-            implements Runnable {
-        public void write(int b)
-                throws IOException {
-            rubyArea.append(String.valueOf((char) b));
-            repaint();
-        }
-
-        public void write(byte[] b)
-                throws IOException {
-            rubyArea.append(new String(b));
-            repaint();
-        }
-
-        public void run() {
-            rubyArea.repaint();
-        }
-    }
-
-    void addLine(String line) {
-        rubyArea.append(line);
-        rubyArea.repaint();
-    }
 }

@@ -55,8 +55,13 @@ namespace :ant do
     end
   end
 
-  desc 'Compile sources'
-  task :compile => [:clean, build] do
+  desc 'Compile Ruby sources'
+  task :compile_ruby => [:clean, build] do
+    sh "jrubyc -t #{src} --java #{lib}/**/*.rb"
+  end
+
+  desc 'Compile Java sources'
+  task :compile_java => [:clean, build] do
     puts "Compiling in #{src}"
     ant.javac :srcdir => src, :destdir => build, :target =>"1.6",
               :debug => debug, :optimize => optimize,
@@ -64,6 +69,9 @@ namespace :ant do
       classpath_with jars
     end
   end
+
+  desc 'Compile all sources'
+  task :compile => [:compile_ruby, :compile_java]
 
   desc 'Build jar package (jruby-complete bundled)'
   task :jar_bundle => [:compile, dist] do
