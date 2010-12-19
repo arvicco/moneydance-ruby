@@ -53,7 +53,8 @@ class RubyConsole
     pane = javax.swing.JScrollPane.new
     pane.viewport_view = text
 
-    @frame = JFrame.new "Moneydance Interactive Ruby Console <JRuby #{JRUBY_VERSION}>"
+    @frame = JFrame.new "Moneydance Interactive JRuby #{JRUBY_VERSION} Console " +
+        "(tab will autocomplete)"
     @frame.default_close_operation = close_operation # DISPOSE_ON_CLOSE
     @frame.set_size 700, 600
     @frame.content_pane.add pane

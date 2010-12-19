@@ -26,7 +26,7 @@ namespace :ant do
 
   # TODO: OSX-specific, need to generalize
   md_command = "/Applications/Moneydance.app/Contents/MacOS/JavaApplicationStub " +
-      "-invoke_and_quit moneydance:fmodule:ruby:showconsole" #runfile?=networth.py"
+      "-invoke_and_quit moneydance:fmodule:ruby:irb" #runfile?=networth.py"
   tail_command = "iterm tail -f #{md_dir}/errlog.txt"
 
   def fileset_with src, build

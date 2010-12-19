@@ -11,6 +11,7 @@ import java.awt.*;
 // Imports compiled Ruby code
 import com.moneydance.modules.features.ruby.rb.*;
 
+
 /**
  * Pluggable Moneydance module used to give users access to Ruby scripting interface.
  */
@@ -25,12 +26,12 @@ public class Main
         // Register this module to be invoked via the application toolbar
         FeatureModuleContext context = getContext();
         try {
+            // Without instantiated RubyEngine that run at least one eval,
+            // compiled Ruby fails on org.jruby.Ruby.getGlobalRuntime() call
             ruby = new RubyEngine(this);
-            ruby.eval("puts 'Hello from Ruby!'");
+            ruby.eval("puts 'Initializing Moneydance Ruby...'");
 
-            context.registerFeature(this, "showconsole",
-                    getIcon("accountlist"),
-                    getName());
+            context.registerFeature(this, "irb", getIcon("ruby"), getName());
         } catch (Exception e) {
             e.printStackTrace(System.err);
         }
@@ -41,7 +42,7 @@ public class Main
      * let go of any references that it may have to the data or the GUI.
      */
     public void cleanup() {
-    //  Was:  synchronized void closeConsole()
+        //  Was:  synchronized void closeConsole()
         if (rubyConsole != null) {
             rubyConsole.dispose();
             rubyConsole = null;
@@ -65,8 +66,7 @@ public class Main
                 command = uri.substring(0, theIdx);
             }
         }
-
-        if (command.equals("showconsole")) {
+        if (command.equals("irb")) {
             showConsole();
         }
     }
@@ -90,7 +90,7 @@ public class Main
         try {
             ClassLoader cl = getClass().getClassLoader();
             java.io.InputStream in =
-                    cl.getResourceAsStream("/com/moneydance/modules/features/ruby/icon.gif");
+                    cl.getResourceAsStream("/com/moneydance/modules/features/ruby/ruby.gif");
             if (in != null) {
                 ByteArrayOutputStream bout = new ByteArrayOutputStream(1000);
                 byte buf[] = new byte[256];

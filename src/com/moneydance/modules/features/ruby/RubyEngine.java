@@ -15,7 +15,7 @@ import java.io.IOException;
  * Wrapper around Ruby Scripting Engine or Container exposing unified interface.
  */
 public class RubyEngine {
-    private static String RubyType = "jsra";
+    private static String RubyType = "container";
     private Main extension = null;
     public ScriptEngine engine = null;
     public Invocable invocable = null;
@@ -65,7 +65,7 @@ public class RubyEngine {
 
                 // Assign classloader since MD loader causes path problems
                 container.setClassLoader(container.getClass().getClassLoader());
-
+                eval("2");
                 System.err.println("jrubyhome: " + container.getHomeDirectory());
 //                jrubyhome = container.getHomeDirectory();
 //                String[] paths = {jrubyhome + "/bin"};
@@ -90,7 +90,7 @@ public class RubyEngine {
     public Object eval(String script, String scriptName) {
         Object result;
         try {
-            System.err.println("ruby evals (" + "scriptName" + "): " + script);
+            System.err.println("ruby evals (" + scriptName + "): " + script);
 
             if (RubyType.equals("jsr") || RubyType.equals("jsr233")) {
                 //  Invoke Ruby via JSR 233 (ScriptEngine)
