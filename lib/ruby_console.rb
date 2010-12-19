@@ -20,24 +20,7 @@ class RubyConsole
     Font.new(fontname, style, size)
   end
 
-  java_signature 'public static RubyConsole start(Object extension, Object context)'
-  # Starts new RubyConsole and runs it in a separate GUI thread
-  #
-  def self.start extension, context
-    console = new extension, context
-
-    if EventQueue.dispatch_thread?
-    #  We are inside Moneydance GUI, use thread
-      Thread.new do
-        console.run_swing JFrame::HIDE_ON_CLOSE
-      end
-    else
-      #  We are in `rake ant:load` session, not inside Moneydance GUI
-      console.run_swing JFrame::EXIT_ON_CLOSE
-    end
-    console
-  end
-
+  # Starts new RubyConsole
   def initialize extension, context
     @extension = extension
     @context = context
@@ -45,6 +28,16 @@ class RubyConsole
     Object.const_set :EXT, @extension
     Object.const_set :MD, @context
     Object.const_set :ROOT, @root
+
+    if EventQueue.dispatch_thread?
+    #  We are inside Moneydance GUI, use thread other than EventQueue.dispatch_thread
+      Thread.new do
+        run_swing JFrame::HIDE_ON_CLOSE
+      end
+    else
+      #  We are in `rake ant:load` session, not inside Moneydance GUI
+      run_swing JFrame::EXIT_ON_CLOSE
+    end
   end
 
   # Runs Swing wrapper for IRB - call from thread other than EventQueue.dispatch_thread
@@ -84,8 +77,8 @@ class RubyConsole
   #
   def show
     @frame.set_visible true
-    @frame.toFront
-    @frame.requestFocus
+    @frame.to_front
+    @frame.request_focus
   end
 
   java_signature 'void dispose()'

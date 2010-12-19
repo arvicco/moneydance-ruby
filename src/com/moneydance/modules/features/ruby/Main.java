@@ -76,7 +76,7 @@ public class Main
      */
     private synchronized void showConsole() {
         if (rubyConsole == null) {
-            rubyConsole = RubyConsole.start(this, getContext());
+            rubyConsole = new RubyConsole(this, getContext());
         } else {
             rubyConsole.show();
         }
