@@ -2,13 +2,7 @@ package com.moneydance.modules.features.ruby;
 
 import com.moneydance.apps.md.controller.*;
 import com.moneydance.apps.md.model.*;
-import org.jruby.embed.ScriptingContainer;
-import org.jruby.embed.jsr223.JRubyEngineFactory;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
-import javax.script.ScriptEngineManager;
 import java.io.*;
 import java.util.*;
 import java.text.*;
@@ -27,19 +21,12 @@ public class Main
     private RubyConsole rubyConsole = null;
     private RubyEngine ruby = null;
 
-    public static void main(String[] args) {
-        Main ext = new Main();
-        ext.init();
-        ext.showConsole();
-    }
-
     public void init() {
         // Register this module to be invoked via the application toolbar
         FeatureModuleContext context = getContext();
         try {
             ruby = new RubyEngine(this);
             ruby.eval("puts 'Hello from Ruby!'");
-            ruby.eval("$LOAD_PATH << 'lib'");
 
             context.registerFeature(this, "showconsole",
                     getIcon("accountlist"),
@@ -49,31 +36,17 @@ public class Main
         }
     }
 
+    /**
+     * This is called when a data set is closed, so that the extension can
+     * let go of any references that it may have to the data or the GUI.
+     */
     public void cleanup() {
+    //  Was:  synchronized void closeConsole()
         if (rubyConsole != null) {
             rubyConsole.dispose();
             rubyConsole = null;
             System.gc();
         }
-    }
-//    synchronized void closeConsole() {
-
-    private Image getIcon(String action) {
-        try {
-            ClassLoader cl = getClass().getClassLoader();
-            java.io.InputStream in =
-                    cl.getResourceAsStream("/com/moneydance/modules/features/ruby/icon.gif");
-            if (in != null) {
-                ByteArrayOutputStream bout = new ByteArrayOutputStream(1000);
-                byte buf[] = new byte[256];
-                int n = 0;
-                while ((n = in.read(buf, 0, buf.length)) >= 0)
-                    bout.write(buf, 0, n);
-                return Toolkit.getDefaultToolkit().createImage(bout.toByteArray());
-            }
-        } catch (Throwable e) {
-        }
-        return null;
     }
 
     /**
@@ -98,33 +71,36 @@ public class Main
         }
     }
 
-    public String getName() {
-        return "Ruby Interface";
-    }
-
     /**
-     * Shows Moneydance IRB console
+     * Shows Moneydance IRB console, starts new one if necessary
      */
     private synchronized void showConsole() {
-
         if (rubyConsole == null) {
-            rubyConsole = new RubyConsole(this, getContext());
-            Thread t = new Thread((Runnable) rubyConsole);
-            t.start();
-            try {
-                if (!EventQueue.isDispatchThread()) {
-                    // Only join in `rake ant:load` session, not inside Moneydance GUI
-                    t.join();
-                }
-            } catch (Exception e) {
-                e.printStackTrace(System.err);
-            }
+            rubyConsole = RubyConsole.start(this, getContext());
         } else {
             rubyConsole.show();
         }
     }
 
-    FeatureModuleContext getUnprotectedContext() {
-        return getContext();
+    public String getName() {
+        return "Ruby Interface";
+    }
+
+    private Image getIcon(String action) {
+        try {
+            ClassLoader cl = getClass().getClassLoader();
+            java.io.InputStream in =
+                    cl.getResourceAsStream("/com/moneydance/modules/features/ruby/icon.gif");
+            if (in != null) {
+                ByteArrayOutputStream bout = new ByteArrayOutputStream(1000);
+                byte buf[] = new byte[256];
+                int n = 0;
+                while ((n = in.read(buf, 0, buf.length)) >= 0)
+                    bout.write(buf, 0, n);
+                return Toolkit.getDefaultToolkit().createImage(bout.toByteArray());
+            }
+        } catch (Throwable e) {
+        }
+        return null;
     }
 }
