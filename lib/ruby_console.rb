@@ -2,7 +2,7 @@ require 'jruby'
 require 'irb'
 require 'irb/completion'
 
-#java_require 'moneydance_irb'  # Require this file, instead of pasting code into .java
+#java_require 'ruby_console'  # Require this file, instead of pasting code into .java
 java_package 'com.moneydance.modules.features.ruby.rb'
 
 import java.awt.Color
@@ -30,12 +30,12 @@ class RubyConsole
     Object.const_set :ROOT, @root
 
     if EventQueue.dispatch_thread?
-    #  We are inside Moneydance GUI, use thread other than EventQueue.dispatch_thread
+      # Called from Moneydance GUI, use thread other than EventQueue.dispatch_thread
       Thread.new do
         run_swing JFrame::HIDE_ON_CLOSE
       end
     else
-      #  We are in `rake ant:load` session, not inside Moneydance GUI
+      # Called from command line (rake ant:load), we're not inside Moneydance GUI
       run_swing JFrame::EXIT_ON_CLOSE
     end
   end

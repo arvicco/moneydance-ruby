@@ -35,7 +35,7 @@ public class RubyEngine {
             File rubyMxt = new File(featureDir, "ruby.mxt");
             Util.copyFile(rubyMxt, rubyJar);
 
-            // Add System path to jruby-complete.jar
+            // Add jruby-complete.jar to System classpath
             String path = System.getProperty("java.class.path");
             path += File.pathSeparator + rubyJar.getCanonicalPath();
             System.setProperty("java.class.path", path);
@@ -65,7 +65,6 @@ public class RubyEngine {
 
                 // Assign classloader since MD loader causes path problems
                 container.setClassLoader(container.getClass().getClassLoader());
-                eval("2");
                 System.err.println("jrubyhome: " + container.getHomeDirectory());
 //                jrubyhome = container.getHomeDirectory();
 //                String[] paths = {jrubyhome + "/bin"};
