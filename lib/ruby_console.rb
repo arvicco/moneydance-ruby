@@ -21,18 +21,17 @@ class RubyConsole
   end
 
   # Starts new RubyConsole
-  def initialize extension, context
-    @extension = extension
+  def initialize main, context
+    @main = main
     @context = context
     @root = context.get_root_account
-    Object.const_set :EXT, @extension
     Object.const_set :MD, @context
     Object.const_set :ROOT, @root
 
     if EventQueue.dispatch_thread?
       # Called from Moneydance GUI, use thread other than EventQueue.dispatch_thread
       Thread.new do
-        run_swing JFrame::HIDE_ON_CLOSE
+        run_swing
       end
     else
       # Called from command line (rake ant:load), we're not inside Moneydance GUI
@@ -42,7 +41,7 @@ class RubyConsole
 
   # Runs Swing wrapper for IRB - call from thread other than EventQueue.dispatch_thread
   #
-  def run_swing close_operation
+  def run_swing close_operation = JFrame::HIDE_ON_CLOSE
     text = javax.swing.JTextPane.new
     text.font = RubyConsole.find_font 'Monospaced', Font::PLAIN, 14, 'Monaco', 'Andale Mono'
     text.margin = java.awt.Insets.new(8, 8, 8, 8)
@@ -59,9 +58,8 @@ class RubyConsole
     @frame.set_size 700, 600
     @frame.content_pane.add pane
 
-    header = "MD - Moneydance context: ComMoneydanceAppsMdController::Main\n" +
-        "EXT - This Moneydance extension: ComMoneydanceModulesFeaturesRuby::Main\n" +
-        "ROOT - Moneydance root account: ComMoneydanceAppsMdModel::RootAccount\n\n"
+    header = " MD - Moneydance context: ComMoneydanceAppsMdController::Main \n" +
+        " ROOT - Moneydance root account: ComMoneydanceAppsMdModel::RootAccount \n\n"
     readline = org.jruby.demo.TextAreaReadline.new text, header
     JRuby.objectspace = true # useful for code completion
     readline.hook_into_runtime_with_streams(JRuby.runtime)
@@ -70,7 +68,7 @@ class RubyConsole
 
     ARGV << '--readline' << '--prompt' << 'inf-ruby'
     IRB.start(__FILE__)
-    @extension.cleanup
+    @main.cleanup
   end
 
   java_signature 'void show()'
