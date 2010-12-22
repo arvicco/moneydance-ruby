@@ -18,7 +18,7 @@ class RubyMain
   def initialize main, context, engine
     STDERR.puts 'Starting RubyMain...'
     @main, @context, @engine = main, context, engine
-    @context.register_feature(@main, "irb", icon('ruby'), @main.name);
+    @context.register_feature(@main, 'irb', icon('ruby'), @main.name);
   end
 
   java_signature 'java.awt.Image icon(String action)'

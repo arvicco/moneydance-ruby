@@ -5,7 +5,7 @@ CLEAN.include 'dist', 'build', 'src/**/rb' # Clean all compiled Ruby sources
 CLOBBER.include 'doc'
 
 namespace :ant do
-  md_dir =  "#{ENV["HOME"]}/.moneydance" # Moneydance user directory
+  md_dir = "#{ENV["HOME"]}/.moneydance" # Moneydance user directory
   features = "#{md_dir}/fmodules/" # Features directory
 
   src = "src" # Java sources directory
@@ -73,45 +73,50 @@ namespace :ant do
   desc 'Compile all sources'
   task :compile => [:compile_ruby, :compile_java]
 
-  desc 'Build jar package (jruby-complete bundled)'
-  task :jar_bundle => [:compile, dist] do
-    ant.jar :destfile => "#{dist}/ruby.mxt" do
-      fileset_with src, build
-      zipfileset :src => "jars/jruby-complete.jar"
-    end
-  end
+  desc 'Default jar method'
+  task :jar => 'jar:update'
 
-  desc 'Update jar package (jruby-complete)'
-  task :jar_update => [:compile, dist] do
-    ant.copy :file => "jars/jruby-complete.jar", :tofile => "#{dist}/jruby-complete.jar"
-    ant.jar :destfile => "#{dist}/jruby-complete.jar", :update => true do
-      fileset_with src, build
+  namespace :jar do
+    desc 'Build jar bundle (jruby-complete is bundled into jar with your code)'
+    task :bundle => [:compile, dist] do
+      ant.jar :destfile => "#{dist}/ruby.mxt" do
+        fileset_with src, build
+        zipfileset :src => "jars/jruby-complete.jar"
+      end
     end
-    ant.move :file => "#{dist}/jruby-complete.jar", :tofile => "#{dist}/ruby.mxt"
-  end
 
-  # Fails on try_ruby with NoClassDefFoundError
-  desc 'Build jar package (jruby-complete as a separate jar)'
-  task :jar_separate => [:compile, dist] do
-    ant.jar :destfile => "#{dist}/ruby.mxt" do
+    desc 'Update jruby-complete jar (your code is mixed into jruby-complete)'
+    task :update => [:compile, dist] do
+      ant.copy :file => "jars/jruby-complete.jar", :tofile => "#{dist}/jruby-complete.jar"
+      ant.jar :destfile => "#{dist}/jruby-complete.jar", :update => true do
+        fileset_with src, build
+      end
+      ant.move :file => "#{dist}/jruby-complete.jar", :tofile => "#{dist}/ruby.mxt"
+    end
+
+    # Fails with NoClassDefFoundError
+    desc 'Separate jar (jruby-complete and your code as two separate jars)'
+    task :separate => [:compile, dist] do
+      ant.jar :destfile => "#{dist}/ruby.mxt" do
 #      ant.jar :destfile => "#{dist}/ruby.mxt", :manifest => "small.manifest" do
-      fileset_with src, build
+        fileset_with src, build
+      end
+      ant.copy :file => "jars/jruby-complete.jar", :tofile => "#{dist}/jruby-complete.jar"
     end
-    ant.copy :file => "jars/jruby-complete.jar", :tofile => "#{dist}/jruby-complete.jar"
-  end
 
-  # Fails on load with NullPointerException
-  desc 'Build jar package (via shell commands, not ant)'
-  task :jar_shell => [:compile, dist] do
-    # Extract jruby-complete so we can combine it with the app
-    Dir.chdir(build) do
-      sh 'jar -xf ../jars/jruby-complete.jar'
+    # Fails on load with NullPointerException
+    desc 'Extract and repack jruby-complete with your code (via shell commands, not ant)'
+    task :repack => [:compile, dist] do
+      # Extract jruby-complete so we can combine it with the app
+      Dir.chdir(build) do
+        sh 'jar -xf ../jars/jruby-complete.jar'
+      end
+      sh "jar -cfm #{dist}/ruby.mxt #{misc}/small.manifest -C #{build} ."
     end
-    sh "jar -cfm #{dist}/ruby.mxt small.manifest -C #{build} ."
   end
 
   desc 'Sign jar package'
-  task :sign => :jar_update do
+  task :sign => :jar do
     ant.java :newenvironment => "true",
              :classname => "com.moneydance.admin.KeyAdmin" do
       classpath_with jars
@@ -125,7 +130,7 @@ namespace :ant do
   end
 
   desc 'Load extension package into Moneydance'
-  task :load => :jar_update do
+  task :load => :jar do
     ant.copy :file => "#{dist}/ruby.mxt", :tofile => "#{features}/ruby.mxt"
     sh "#{md_command}"
   end
