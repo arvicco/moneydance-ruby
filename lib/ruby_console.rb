@@ -21,12 +21,13 @@ java_import 'java.awt.event.ActionEvent' # Compiler needs this directive to impl
 # using the component's #addActionListener method. When the action event occurs,
 # registered listener's #actionPerformed method is invoked.
 class RubyConsole
- java_implements java.awt.event.ActionListener
+ java_implements ActionListener
 
   # Try to find preferred font family, use otherwise -- err -- otherwise
-  def self.find_font otherwise, style, size, *families
-    families = java.awt.GraphicsEnvironment.local_graphics_environment.available_font_family_names
-    fontname = families.find(proc { otherwise }) { |name| families.include? name }
+  def self.find_font otherwise, style, size, *preferred
+    available = java.awt.GraphicsEnvironment.local_graphics_environment.available_font_family_names
+    fontname = preferred.find { |name| available.include? name }
+    fontname ||= otherwise
     Font.new(fontname, style, size)
   end
 
@@ -55,7 +56,7 @@ class RubyConsole
   def run_irb close_operation = JFrame::HIDE_ON_CLOSE # DISPOSE_ON_CLOSE ?
     STDERR.puts "RubyConsole run_irb called"
     text = javax.swing.JTextPane.new
-    text.font = RubyConsole.find_font 'Monospaced', Font::PLAIN, 14, 'Monaco', 'Andale Mono'
+    text.font = RubyConsole.find_font 'Monospaced', Font::PLAIN, 14, 'Menlo', 'Monaco', 'Andale Mono'
     text.margin = java.awt.Insets.new(8, 8, 8, 8)
     text.caret_color = Color.new(0xa4, 0x00, 0x00)
     text.background = Color.new(0xf2, 0xf2, 0xf2)
