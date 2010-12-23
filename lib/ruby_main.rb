@@ -18,6 +18,12 @@ class RubyMain
   def initialize main, context, engine
     STDERR.puts 'Starting RubyMain...'
     @main, @context, @engine = main, context, engine
+    @root = context.get_root_account
+
+    # Setting universally accessible constants in JRuby runtime for Moneydance access
+    Object.const_set :MD, @context
+    Object.const_set :ROOT, @root
+
     # Register irb url to be invoked via the application toolbar
     @context.register_feature(@main, 'irb', icon('ruby'), @main.name);
   end
@@ -61,7 +67,7 @@ class RubyMain
       @console.show
     else
       # We need to address RubyConsole via full java name... Why?
-      @console ||= com.moneydance.modules.features.ruby.rb.RubyConsole.new(self, @context)
+      @console ||= com.moneydance.modules.features.ruby.rb.RubyConsole.new self
     end
   end
 

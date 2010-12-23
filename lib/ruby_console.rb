@@ -1,5 +1,4 @@
 require 'jruby'
-#require 'java'
 require 'irb'
 require 'irb/completion'
 
@@ -31,13 +30,9 @@ class RubyConsole
   end
 
   # Starts new RubyConsole
-  def initialize ruby_main, context
+  def initialize ruby_main
     STDERR.puts "RubyConsole init called"
     @ruby_main = ruby_main
-    @context = context
-    @root = context.get_root_account
-    Object.const_set :MD, @context
-    Object.const_set :ROOT, @root
 
     if EventQueue.dispatch_thread?
       # Called from Moneydance GUI, use thread other than EventQueue.dispatch_thread
