@@ -1,5 +1,5 @@
 require 'jruby'
-require 'java'
+#require 'java'
 require 'irb'
 require 'irb/completion'
 
@@ -11,7 +11,9 @@ import java.awt.Font
 import java.awt.EventQueue
 import javax.swing.JFrame
 import javax.swing.JFileChooser
-java_import 'java.awt.event.*' # Compiler needs this directive to implement ActionListener
+import com.moneydance.awt.AwtUtil
+java_import 'java.awt.event.ActionListener' # Compiler needs this directive to implement ActionListener
+java_import 'java.awt.event.ActionEvent' # Compiler needs this directive to implement ActionListener
 
 # Moneydance IRB Console
 # Implements ActionListener: The listener interface for receiving action events.
@@ -19,7 +21,7 @@ java_import 'java.awt.event.*' # Compiler needs this directive to implement Acti
 # using the component's #addActionListener method. When the action event occurs,
 # registered listener's #actionPerformed method is invoked.
 class RubyConsole
-  java_implements ActionListener
+ java_implements java.awt.event.ActionListener
 
   # Try to find preferred font family, use otherwise -- err -- otherwise
   def self.find_font otherwise, style, size, *families
@@ -30,6 +32,7 @@ class RubyConsole
 
   # Starts new RubyConsole
   def initialize ruby_main, context
+    STDERR.puts "RubyConsole init called"
     @ruby_main = ruby_main
     @context = context
     @root = context.get_root_account
@@ -50,6 +53,7 @@ class RubyConsole
   # Runs Swing wrapper for IRB - call from thread other than EventQueue.dispatch_thread
   #
   def run_irb close_operation = JFrame::HIDE_ON_CLOSE # DISPOSE_ON_CLOSE ?
+    STDERR.puts "RubyConsole run_irb called"
     text = javax.swing.JTextPane.new
     text.font = RubyConsole.find_font 'Monospaced', Font::PLAIN, 14, 'Monaco', 'Andale Mono'
     text.margin = java.awt.Insets.new(8, 8, 8, 8)
@@ -57,14 +61,29 @@ class RubyConsole
     text.background = Color.new(0xf2, 0xf2, 0xf2)
     text.foreground = Color.new(0xa4, 0x00, 0x00)
 
-    pane = javax.swing.JScrollPane.new
-    pane.viewport_view = text
+    irb_pane = javax.swing.JScrollPane.new
+    irb_pane.viewport_view = text
+#
+#    file_button = javax.swing.JButton.new "Load file"
+#
+#    p = javax.swing.JPanel.new java.awt.GridBagLayout.new
+#    p.setBorder(javax.swing.border.EmptyBorder.new(10,10,10,10))
+#    p.add(irb_pane, AwtUtil.getConstraints(0,0,1,1,4,1,true,true))
+#    p.add(javax.swing.Box.createVerticalStrut(8), AwtUtil.getConstraints(0,2,0,0,1,1,false,false))
+#    p.add(file_button, AwtUtil.getConstraints(0,3,1,0,1,1,false,true))
+#
+##    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+##    enableEvents(WindowEvent.WINDOW_CLOSING);
+#    file_button.addActionListener(self)
+##    inputArea.addActionListener(this);
+#
 
     @frame = JFrame.new "Moneydance Interactive JRuby #{JRUBY_VERSION} Console " +
                             "(tab will autocomplete)"
     @frame.default_close_operation = close_operation
     @frame.set_size 700, 600
-    @frame.content_pane.add pane
+    @frame.content_pane.add irb_pane
+#    @frame.content_pane.add p
 
     header = " MD - Moneydance context: ComMoneydanceAppsMdController::Main \n" +
         " ROOT - Moneydance root account: ComMoneydanceAppsMdModel::RootAccount \n\n"
@@ -82,7 +101,7 @@ class RubyConsole
   java_signature 'public void actionPerformed(ActionEvent event)'
   # from ActionListener interface: Invoked when an action event occurs.
   def action_performed event
-
+    STDERR.puts "Got event: #{event}"
   end
 
   def load_file
