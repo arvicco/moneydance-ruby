@@ -57,10 +57,12 @@ class RubyMain
   # Moneydance URI: moneydance:fmodule:ruby:irb
   #
   def irb
-    STDERR.puts "irb called"
-    # We need to address RubyConsole via full java name... Why?
-    @console ||= com.moneydance.modules.features.ruby.rb.RubyConsole.new(self, @context)
-    @console.show
+    if @console
+      @console.show
+    else
+      # We need to address RubyConsole via full java name... Why?
+      @console ||= com.moneydance.modules.features.ruby.rb.RubyConsole.new(self, @context)
+    end
   end
 
   java_signature 'synchronized void file(String path)'

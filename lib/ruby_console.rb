@@ -26,9 +26,8 @@ class RubyConsole
   # Try to find preferred font family, use otherwise -- err -- otherwise
   def self.find_font otherwise, style, size, *preferred
     available = java.awt.GraphicsEnvironment.local_graphics_environment.available_font_family_names
-    fontname = preferred.find { |name| available.include? name }
-    fontname ||= otherwise
-    Font.new(fontname, style, size)
+    font_name = preferred.find { |name| available.include? name } || otherwise
+    Font.new(font_name, style, size)
   end
 
   # Starts new RubyConsole
@@ -62,29 +61,24 @@ class RubyConsole
     text.background = Color.new(0xf2, 0xf2, 0xf2)
     text.foreground = Color.new(0xa4, 0x00, 0x00)
 
-    irb_pane = javax.swing.JScrollPane.new
-    irb_pane.viewport_view = text
-#
-#    file_button = javax.swing.JButton.new "Load file"
-#
-#    p = javax.swing.JPanel.new java.awt.GridBagLayout.new
-#    p.setBorder(javax.swing.border.EmptyBorder.new(10,10,10,10))
-#    p.add(irb_pane, AwtUtil.getConstraints(0,0,1,1,4,1,true,true))
-#    p.add(javax.swing.Box.createVerticalStrut(8), AwtUtil.getConstraints(0,2,0,0,1,1,false,false))
-#    p.add(file_button, AwtUtil.getConstraints(0,3,1,0,1,1,false,true))
-#
-##    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-##    enableEvents(WindowEvent.WINDOW_CLOSING);
-#    file_button.addActionListener(self)
-##    inputArea.addActionListener(this);
-#
+    @irb_pane = javax.swing.JScrollPane.new
+    @irb_pane.viewport_view = text
+
+    @file_button = javax.swing.JButton.new "Load file"
+
+    pane = javax.swing.JPanel.new java.awt.GridBagLayout.new
+    pane.add(@irb_pane, AwtUtil.getConstraints(0,0,1,1,4,1,true,true))
+    pane.add(@file_button, AwtUtil.getConstraints(0,3,1,0,1,1,false,true))
+
+#    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+#    enableEvents(WindowEvent.WINDOW_CLOSING);
+    @file_button.addActionListener(self)
 
     @frame = JFrame.new "Moneydance Interactive JRuby #{JRUBY_VERSION} Console " +
                             "(tab will autocomplete)"
     @frame.default_close_operation = close_operation
-    @frame.set_size 700, 600
-    @frame.content_pane.add irb_pane
-#    @frame.content_pane.add p
+    @frame.set_size 800, 800
+    @frame.content_pane.add pane
 
     header = " MD - Moneydance context: ComMoneydanceAppsMdController::Main \n" +
         " ROOT - Moneydance root account: ComMoneydanceAppsMdModel::RootAccount \n\n"
@@ -102,17 +96,23 @@ class RubyConsole
   java_signature 'public void actionPerformed(ActionEvent event)'
   # from ActionListener interface: Invoked when an action event occurs.
   def action_performed event
-    STDERR.puts "Got event: #{event}"
+    case event.source
+      when @file_button
+        load_file
+        show
+      else
+        STDERR.puts "Got unexpected event: #{event}"
+    end
   end
 
   def load_file
     fc = JFileChooser.new
-    fc.setDialogTitle("Choose Ruby File")
-    if fc.showOpenDialog(self) == JFileChooser::APPROVE_OPTION
+    fc.setDialogTitle("Choose Ruby Script File")
+    if fc.showOpenDialog(@frame) == JFileChooser::APPROVE_OPTION
       STDERR.puts fc.getSelectedFile
       @ruby_main.file fc.getSelectedFile.absolute_path
     else
-      STDERR.puts "Aaaargh"
+      STDERR.puts "Unrecognized Ruby Script File"
     end
   end
 
@@ -122,7 +122,7 @@ class RubyConsole
   def show
     @frame.set_visible true
     @frame.to_front
-    @frame.request_focus
+    @irb_pane.request_focus
   end
 
   java_signature 'void dispose()'
