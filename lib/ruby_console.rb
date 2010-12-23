@@ -1,4 +1,5 @@
 require 'jruby'
+require 'java'
 require 'irb'
 require 'irb/completion'
 
@@ -10,9 +11,11 @@ import java.awt.Font
 import java.awt.EventQueue
 import javax.swing.JFrame
 import javax.swing.JFileChooser
+java_import 'java.awt.event.*' # Compiler needs this directive
 
 # Moneydance IRB Console
 class RubyConsole
+  java_implements ActionListener
 
   # Try to find preferred font family, use otherwise -- err -- otherwise
   def self.find_font otherwise, style, size, *families
@@ -70,6 +73,12 @@ class RubyConsole
     ARGV << '--readline' << '--prompt' << 'inf-ruby'
     IRB.start(__FILE__)
     @ruby_main.cleanup
+  end
+
+  java_signature 'public void actionPerformed(ActionEvent e)'
+
+  def action_performed event
+
   end
 
   def load_file

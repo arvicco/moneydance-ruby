@@ -58,14 +58,9 @@ class RubyMain
   #
   def irb
     STDERR.puts "irb called"
-    if @console
-      STDERR.puts 'Showing Ruby console'
-      @console.show
-    else
-      STDERR.puts 'Creating Ruby console'
-      # We need to address RubyConsole via full java name... Why?
-      @console = com.moneydance.modules.features.ruby.rb.RubyConsole.new(self, @context)
-    end
+    # We need to address RubyConsole via full java name... Why?
+    @console ||= com.moneydance.modules.features.ruby.rb.RubyConsole.new(self, @context)
+    @console.show
   end
 
   java_signature 'synchronized void file(String path)'
