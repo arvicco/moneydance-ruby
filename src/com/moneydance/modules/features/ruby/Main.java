@@ -24,19 +24,11 @@ public class Main
      * visible) and the data file may or may not have been loaded.
      */
     public void init() {
-        System.err.println("init() called...");
-        System.err.println(getIDStr()+ getVendor() + getVendorURL());
-        // Register this module to be invoked via the application toolbar
-        FeatureModuleContext context = getContext();
+        System.err.println("init() called for extension: " +
+                getIDStr() + " by " + getVendor() + ", url: " + getVendorURL());
         try {
-            System.err.println("user.dir: " + System.getProperty("user.dir"));
             rubyEngine = new RubyEngine(this);
-            // We need to kick Ruby runtime to wake it up. Without running Ruby runtime,
-            // compiled Ruby fails on org.jruby.Ruby.getGlobalRuntime() call
-            rubyEngine.eval("STDERR.puts 'Starting Moneydance Ruby runtime...'");
-            rubyMain = new RubyMain(this, context, rubyEngine);
-//            context.registerFeature(this, "irb", getIcon(), getName());
-
+            rubyMain = new RubyMain(this, getContext(), rubyEngine);
         } catch (Exception e) {
             e.printStackTrace(System.err);
         }
@@ -45,9 +37,8 @@ public class Main
     /**
      * Get a descriptive name for this extension. This is called before Main#init(),
      * so it is not possible to delegate to RubyMain
-     *
      */
-     public String getName() {
+    public String getName() {
         return "Ruby Interface";
     }
 
@@ -67,7 +58,6 @@ public class Main
      * "show_summary:year=1999"
      */
     public void invoke(String uri) {
-        System.err.println("invoke() called...");
         rubyMain.invoke(uri);
     }
 
@@ -76,7 +66,6 @@ public class Main
      * let go of any references that it may have to the data or the GUI.
      */
     public void cleanup() {
-        System.err.println("cleanup() called...");
         rubyMain.cleanup();
     }
 }

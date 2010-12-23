@@ -21,6 +21,7 @@ $ rake ant:jar
 
 This produces ruby.ext in dist subdirectory. You can then install this file into
 MoneyDance menu: Extensions->Add->From file [Next>] Choose ruby.ext file.
+Ignore the warning that you're loading unsigned extension.
 
 USAGE
 

@@ -39,16 +39,18 @@ public class RubyEngine {
             String path = System.getProperty("java.class.path");
             path += File.pathSeparator + rubyJar.getCanonicalPath();
             System.setProperty("java.class.path", path);
-            System.err.println("classpath: " + System.getProperty("java.class.path"));
 
             //Set up jruby.home
             home = "file:" + rubyJar.getCanonicalPath() + "!/META-INF/jruby.home";
             System.setProperty("jruby.home", home);
 
+            System.err.println("classpath: " + System.getProperty("java.class.path"));
+            System.err.println("jruby.home: " + System.getProperty("jruby.home"));
+            System.err.println("user.dir: " + System.getProperty("user.dir"));
+
             if (RubyType.equals("jsr") || RubyType.equals("jsr233")) {
 //                System.setProperty("org.jruby.embed.localcontext.scope", "singlethread");
 //                classPath = System.getProperty("org.jruby.embed.class.path");
-//                System.out.println("rubyJar: " + rubyJar.getCanonicalPath());
 //                System.out.println("org.jruby.embed.class.path: " + classPath);
 //                System.setProperty("org.jruby.embed.class.path", jrubyhome + "/bin");
 //                System.setProperty("jruby.home", jrubyhome);
@@ -63,7 +65,7 @@ public class RubyEngine {
                 // Initialize Ruby as RedBridge (ScriptingContainer)
                 container = new ScriptingContainer(LocalContextScope.THREADSAFE);// LocalContextScope.SINGLETHREAD);
 
-                // Assign classloader since MD loader causes path problems
+                // Assign JRuby classloader since MD classloader causes path problems
                 container.setClassLoader(container.getClass().getClassLoader());
                 System.err.println("jrubyhome: " + container.getHomeDirectory());
 //                jrubyhome = container.getHomeDirectory();
@@ -71,6 +73,9 @@ public class RubyEngine {
 //                container.setLoadPaths(Arrays.asList(paths));       // add "bin" directory to $LOAD_PATH
 //                container.setLoadPaths(Arrays.asList(new String[]{"lib"}));
             }
+            // We need to kick Ruby runtime to wake it up. Without running Ruby runtime,
+            // compiled Ruby fails on org.jruby.Ruby.getGlobalRuntime() call
+            eval("STDERR.puts 'Kick-starting Ruby runtime...'");
         } catch (Exception e) {
             e.printStackTrace(System.err);
             System.err.println("Caught exception during JRuby init");

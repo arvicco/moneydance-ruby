@@ -7,8 +7,9 @@ java_package 'com.moneydance.modules.features.ruby.rb'
 
 import java.awt.Color
 import java.awt.Font
-import javax.swing.JFrame
 import java.awt.EventQueue
+import javax.swing.JFrame
+import javax.swing.JFileChooser
 
 # Moneydance IRB Console
 class RubyConsole
@@ -21,8 +22,8 @@ class RubyConsole
   end
 
   # Starts new RubyConsole
-  def initialize main, context
-    @main = main
+  def initialize ruby_main, context
+    @ruby_main = ruby_main
     @context = context
     @root = context.get_root_account
     Object.const_set :MD, @context
@@ -31,17 +32,17 @@ class RubyConsole
     if EventQueue.dispatch_thread?
       # Called from Moneydance GUI, use thread other than EventQueue.dispatch_thread
       Thread.new do
-        run_swing
+        run_irb
       end
     else
       # Called from command line (rake ant:load), we're not inside Moneydance GUI
-      run_swing JFrame::EXIT_ON_CLOSE
+      run_irb JFrame::EXIT_ON_CLOSE
     end
   end
 
   # Runs Swing wrapper for IRB - call from thread other than EventQueue.dispatch_thread
   #
-  def run_swing close_operation = JFrame::HIDE_ON_CLOSE
+  def run_irb close_operation = JFrame::HIDE_ON_CLOSE # DISPOSE_ON_CLOSE ?
     text = javax.swing.JTextPane.new
     text.font = RubyConsole.find_font 'Monospaced', Font::PLAIN, 14, 'Monaco', 'Andale Mono'
     text.margin = java.awt.Insets.new(8, 8, 8, 8)
@@ -53,8 +54,8 @@ class RubyConsole
     pane.viewport_view = text
 
     @frame = JFrame.new "Moneydance Interactive JRuby #{JRUBY_VERSION} Console " +
-        "(tab will autocomplete)"
-    @frame.default_close_operation = close_operation # DISPOSE_ON_CLOSE
+                            "(tab will autocomplete)"
+    @frame.default_close_operation = close_operation
     @frame.set_size 700, 600
     @frame.content_pane.add pane
 
@@ -68,7 +69,18 @@ class RubyConsole
 
     ARGV << '--readline' << '--prompt' << 'inf-ruby'
     IRB.start(__FILE__)
-    @main.cleanup
+    @ruby_main.cleanup
+  end
+
+  def load_file
+    fc = JFileChooser.new
+    fc.setDialogTitle("Choose Ruby File")
+    if fc.showOpenDialog(self) == JFileChooser::APPROVE_OPTION
+      STDERR.puts fc.getSelectedFile
+      @ruby_main.file fc.getSelectedFile.absolute_path
+    else
+      STDERR.puts "Aaaargh"
+    end
   end
 
   java_signature 'void show()'

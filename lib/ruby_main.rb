@@ -18,15 +18,17 @@ class RubyMain
   def initialize main, context, engine
     STDERR.puts 'Starting RubyMain...'
     @main, @context, @engine = main, context, engine
+    # Register irb url to be invoked via the application toolbar
     @context.register_feature(@main, 'irb', icon('ruby'), @main.name);
   end
 
   java_signature 'java.awt.Image icon(String action)'
+
   def icon action = 'ruby'
-   loader = @main.get_class.get_class_loader
-   stream = loader.get_resource_as_stream("/com/moneydance/modules/features/ruby/#{action}.gif")
-   bytes = stream.to_io.read.to_java_bytes
-   java.awt.Toolkit.default_toolkit.create_image(bytes)
+    loader = @main.get_class.get_class_loader
+    stream = loader.get_resource_as_stream("/com/moneydance/modules/features/ruby/#{action}.gif")
+    bytes = stream.to_io.read.to_java_bytes
+    java.awt.Toolkit.default_toolkit.create_image(bytes)
   end
 
   java_signature 'synchronized void cleanup()'
@@ -34,6 +36,7 @@ class RubyMain
   # let go of any references that it may have to the data or the GUI.
   #
   def cleanup
+    STDERR.puts "cleanup called"
     if @console
       @console.dispose
       System.gc
@@ -44,6 +47,7 @@ class RubyMain
   # Process an invocation of this module with the given URI
   #
   def invoke uri
+    STDERR.puts "invoke called with: #{uri}"
     command, args = uri.split /[:?&]/
     send *[command, args].flatten.compact
   end
@@ -53,13 +57,21 @@ class RubyMain
   # Moneydance URI: moneydance:fmodule:ruby:irb
   #
   def irb
+    STDERR.puts "irb called"
     if @console
-      STDERR.puts 'Showing Ruby console...'
+      STDERR.puts 'Showing Ruby console'
       @console.show
     else
-      STDERR.puts 'Creating Ruby console...'
+      STDERR.puts 'Creating Ruby console'
       # We need to address RubyConsole via full java name... Why?
-      @console = com.moneydance.modules.features.ruby.rb.RubyConsole.new(@main, @context)
+      @console = com.moneydance.modules.features.ruby.rb.RubyConsole.new(self, @context)
     end
+  end
+
+  java_signature 'synchronized void file(String path)'
+
+  def file path
+    STDERR.puts "file called with: #{path}"
+    load path
   end
 end
