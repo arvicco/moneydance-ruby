@@ -11,16 +11,20 @@ import java.awt.Font
 import java.awt.EventQueue
 import javax.swing.JFrame
 import javax.swing.JFileChooser
-java_import 'java.awt.event.*' # Compiler needs this directive
+java_import 'java.awt.event.*' # Compiler needs this directive to implement ActionListener
 
 # Moneydance IRB Console
+# Implements ActionListener: The listener interface for receiving action events.
+# Instance of class that implements this interface can registered with any component
+# using the component's #addActionListener method. When the action event occurs,
+# registered listener's #actionPerformed method is invoked.
 class RubyConsole
   java_implements ActionListener
 
   # Try to find preferred font family, use otherwise -- err -- otherwise
   def self.find_font otherwise, style, size, *families
-    avail_families = java.awt.GraphicsEnvironment.local_graphics_environment.available_font_family_names
-    fontname = families.find(proc { otherwise }) { |name| avail_families.include? name }
+    families = java.awt.GraphicsEnvironment.local_graphics_environment.available_font_family_names
+    fontname = families.find(proc { otherwise }) { |name| families.include? name }
     Font.new(fontname, style, size)
   end
 
@@ -75,8 +79,8 @@ class RubyConsole
     @ruby_main.cleanup
   end
 
-  java_signature 'public void actionPerformed(ActionEvent e)'
-
+  java_signature 'public void actionPerformed(ActionEvent event)'
+  # from ActionListener interface: Invoked when an action event occurs.
   def action_performed event
 
   end
