@@ -1,6 +1,6 @@
 {
   "vendor" = "Arvicco"
-  "module_build" = "0.1.0"
+  "module_build" = "11"
   "vendor.url" = "http://github.com/arvicco/moneydance-ruby/"
   "module_name" = "Ruby scripting"
   "module_desc" = "<html><body><title>Ruby scripting</title><p>Ruby scripting for Moneydance.</p></body></html>"
