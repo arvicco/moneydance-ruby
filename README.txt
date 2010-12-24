@@ -1,13 +1,13 @@
 DESCRIPTION
 
+This is a MoneyDance extension that adds Ruby scripting support to it.
+
 Moneydance is a full-featured personal financial management application featuring
 online banking, online bill payment, investment management, budget tracking,
 scheduled transactions, check printing, detailed reports/graphs and more.
 
 It is cross-platform (Java) and offers best programming API for extension among
 similar applications. However, currently it only supports Java and Python.
-
-This is an extension to MoneyDance which adds Ruby scripting support to it.
 
 PREREQUISITES
 

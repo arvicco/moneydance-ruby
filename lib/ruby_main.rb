@@ -75,6 +75,12 @@ class RubyMain
 
   def file path
     STDERR.puts "file called with: #{path}"
-    load path
+    puts "Loading file: #{path}"
+    begin
+      load path
+    rescue => e
+      puts e.inspect
+      puts e.backtrace.join("\n\tfrom ")
+    end
   end
 end
