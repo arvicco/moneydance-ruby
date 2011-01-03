@@ -19,7 +19,7 @@ You should have Moneydance 2010, Java 1.6 and JRuby 1.5+ installed and functiona
 
 == INSTALL EXTENSION
 
-Complete instructions and downloads here[http://arvicco.github.com/moneydance-ruby].
+Instructions and downloads are here[http://arvicco.github.com/moneydance-ruby].
 
 == INSTALL FROM SOURCE
 
@@ -28,15 +28,18 @@ Complete instructions and downloads here[http://arvicco.github.com/moneydance-ru
   $ rake ant:jar
 
 This produces ruby.ext in dist subdirectory. You can then install this file into
-Moneydance menu: Extensions->Add->From file [Next>] Choose ruby.ext file.
+Moneydance via Menu:Extensions->Add->From file [Next>] Choose ruby.ext file.
 Ignore the warning that you're loading unsigned extension.
 
 == USAGE
 
 Installed extension adds "Ruby interface" item to Extensions menu. This item opens
 IRB console that you can use to run arbitrary code against live Moneydance and its
-data files. In future, I plan to add capacity for loading/running Ruby script files,
-as well as nice ORM wrapper around Moneydance data file (probably ActiveModel).
+data files. You can also load/run Ruby script files inside Moneydance environment,
+both from GUI and from command line. More info on extension
+homepage[http://arvicco.github.com/moneydance-ruby].
+
+In future, I plan to add a nice ORM wrapper around Moneydance data file (probably ActiveModel).
 
 == RESOURCES
 
