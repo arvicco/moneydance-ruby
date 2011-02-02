@@ -4,6 +4,33 @@ require 'ant'
 CLEAN.include 'dist', 'build', 'src/**/rb' # Clean all compiled Ruby sources
 CLOBBER.include 'doc'
 
+desc "Migrates an existing website folder into a gh-pages branch, and links back as submodule"
+task :migrate_website do
+  current_branch = `git branch | grep "^*" | sed -e "s/* //"`.strip
+  repo = `git config --list | grep "^remote.origin.url" | sed -e "s/remote.origin.url=//"`.strip
+  website_folder = ENV['WEBSITE_PATH'] || 'website'
+  tmp_folder = "/tmp/gh-pages-website"
+  puts "Moving #{website_folder} folder to branch gh-pages."
+  puts "Working in #{current_branch} branch of #{repo}:"
+  commands = <<-CMD.gsub(/^      /, '')
+   rm -rf #{tmp_folder}
+   mv #{website_folder} #{tmp_folder}
+   git commit -a -m "temporarily removing #{website_folder} whilst moving to gh-pages branch"
+   git symbolic-ref HEAD refs/heads/gh-pages
+   rm .git/index
+   git clean -fdx
+   cp -R #{tmp_folder}/* .
+   git add .
+   git commit -a -m 'Import original #{website_folder} folder from #{current_branch} branch'
+   git push origin gh-pages
+   git checkout #{current_branch}
+   git submodule add -b gh-pages #{repo} #{website_folder}
+   git commit -a -m "migrated #{website_folder} -> gh-pages branch, and replaced with submodule link"
+   git push
+  CMD
+  commands.split(/\n/).each { |cmd| sh cmd }
+end
+
 namespace :ant do
   md_dir = "#{ENV["HOME"]}/.moneydance" # Moneydance user directory
   features = "#{md_dir}/fmodules/" # Features directory

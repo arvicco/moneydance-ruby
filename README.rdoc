@@ -1,21 +1,21 @@
-= amqp-spec
-by: Arvicco
+= moneydance-ruby
+
 url: http://arvicco.github.com/moneydance-ruby
 
 == DESCRIPTION
 
-This is a Moneydance[http://moneydance.com/] extension that adds Ruby scripting support to it.
+This is a Moneydance[http://moneydance.com] extension that adds Ruby scripting support to it.
 
-Moneydance[http://moneydance.com/] is a full-featured personal financial management
+Moneydance[http://moneydance.com] is a full-featured personal financial management
 application featuring online banking, online bill payment, investment management, budget
 tracking, scheduled transactions, check printing, detailed reports/graphs and more.
 
 It is cross-platform (Java) and offers best programming API for extension among
-similar applications. However, currently it only supports Java and Python.
+similar applications. However, currently this API only supports Java and Python.
 
 == PREREQUISITES
 
-You should have Moneydance 2010, Java 1.6 and JRuby 1.5+ installed and functional.
+You should have Moneydance 2010, Java 1.6 and JRuby 1.5.6+ installed and functional.
 
 == INSTALL EXTENSION
 
