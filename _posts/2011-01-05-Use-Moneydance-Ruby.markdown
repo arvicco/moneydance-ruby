@@ -34,12 +34,7 @@ On OSX (assuming you installed Moneydance into /Applications), use:
 
 That's a mouthful, so you may want to create an alias in your profile.
 
-## Moneydance Ruby is JRuby
-
-Moneydance Ruby is [JRuby](http://www.jruby.org) and its interactive console is
-derived from Jirb_swing.
-
-## Working with Moneydance from Ruby
+## Working with Moneydance API from Ruby
 
 [Moneydance Ruby Primer](/moneydance-ruby/2011/01/10/Work-with-Moneydance-API.html)
 highlights some of the useful methods and approaches to programmatically accessing Moneydance.
