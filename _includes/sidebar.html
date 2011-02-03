@@ -1,0 +1,45 @@
+<div id="sidebar">
+    <div class="item">
+        <!-- Download   -->
+        <h4>
+            <a href="http://github.com/downloads/arvicco/moneydance-ruby/ruby.mxt">
+                Download</a></h4>
+
+        <p>
+            <a href="http://github.com/downloads/arvicco/moneydance-ruby/ruby.mxt">
+                Extension</a><br/>
+            <a href="http://github.com/arvicco/moneydance-ruby/zipball/master">
+                Source code</a>
+        </p>
+    </div>
+    <div class="item">
+        <!-- Sections / Posts   -->
+        <h4>How do I... </h4>
+
+        <p>
+            {% for post in site.posts reversed %}
+            - <a href="/moneydance-ruby{{ post.url }}">{{ post.title }}</a><br>
+            {% endfor %}
+        </p>
+        <br><a href="atom.xml" id="rss_feed" name="rss_feed">... get it all in RSS
+        feed</a>
+    </div>
+    <div class="item">
+        <!-- Tickets   -->
+        <h4>Tickets/Issues</h4>
+
+        <p>
+            <a href="http://github.com/arvicco/moneydance-ruby/issues">
+                Report a bug</a><br/>
+            <a href="http://github.com/arvicco/moneydance-ruby/issues">
+                Request a feature</a>
+        </p>
+    </div>
+    <div class="item">
+        <!-- Forum   -->
+        <h4>Discussion</a>
+        </h4>
+        <script type="text/javascript"
+                src="http://disqus.com/forums/moneydance-ruby/combination_widget.js?num_items=5&color=orange&default_tab=recent"></script>
+    </div>
+</div>
