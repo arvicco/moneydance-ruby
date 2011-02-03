@@ -11,7 +11,9 @@ application featuring online banking, online bill payment, investment management
 tracking, scheduled transactions, check printing, detailed reports/graphs and more.
 
 It is cross-platform (Java) and offers best programming API for extension among
-similar applications. However, currently this API only supports Java and Python.
+similar applications. However, previously this API only supported Java and Python.
+
+Moneydance Ruby extends Moneydance by adding efficient Ruby scripting support to it.
 
 == PREREQUISITES
 
@@ -47,7 +49,7 @@ In future, I plan to add a nice ORM wrapper around Moneydance data file (probabl
 * Moneydance[http://moneydance.com/]
 * {Moneydance API}[http://moneydance.com/dev/ext_api_docs/index.html]
 * {Moneydance URI Scheme}[http://moneydance.com/dev/urischeme]
-* {Primer on Moneydance Methods}[http://arvicco.github.com/moneydance-ruby/Primer.html]
+* {Moneydance Ruby Primer}[http://arvicco.github.com/moneydance-ruby/2011/01/10/Work-with-Moneydance-API.html]
 
 == LICENSE
 
