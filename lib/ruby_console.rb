@@ -16,11 +16,11 @@ java_import 'java.awt.event.ActionEvent' # Compiler needs this directive to impl
 
 # Moneydance IRB Console
 # Implements ActionListener: The listener interface for receiving action events.
-# Instance of class that implements this interface can registered with any component
+# Instance of class that implements this interface can be registered with any component
 # using the component's #addActionListener method. When the action event occurs,
 # registered listener's #actionPerformed method is invoked.
 class RubyConsole
- java_implements ActionListener
+  java_implements ActionListener
 
   # Try to find preferred font family, use otherwise -- err -- otherwise
   def self.find_font otherwise, style, size, *preferred
@@ -62,8 +62,8 @@ class RubyConsole
     @file_button = javax.swing.JButton.new "Load file"
 
     pane = javax.swing.JPanel.new java.awt.GridBagLayout.new
-    pane.add(@irb_pane, AwtUtil.getConstraints(0,0,1,1,4,1,true,true))
-    pane.add(@file_button, AwtUtil.getConstraints(0,3,1,0,1,1,false,true))
+    pane.add(@irb_pane, AwtUtil.getConstraints(0, 0, 1, 1, 4, 1, true, true))
+    pane.add(@file_button, AwtUtil.getConstraints(0, 3, 1, 0, 1, 1, false, true))
 
 #    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 #    enableEvents(WindowEvent.WINDOW_CLOSING);
@@ -76,7 +76,9 @@ class RubyConsole
     @frame.content_pane.add pane
 
     header = " MD - Moneydance context: ComMoneydanceAppsMdController::Main \n" +
-        " ROOT - Moneydance root account: ComMoneydanceAppsMdModel::RootAccount \n\n"
+        " ROOT - Moneydance root account: ComMoneydanceAppsMdModel::RootAccount \n" +
+        " TRANS - Moneydance TransactionSet: ComMoneydanceAppsMdModel::TransactionSet \n\n"
+
     readline = org.jruby.demo.TextAreaReadline.new text, header
     JRuby.objectspace = true # useful for code completion
     readline.hook_into_runtime_with_streams(JRuby.runtime)
@@ -100,11 +102,12 @@ class RubyConsole
     end
   end
 
+  # Interactively loads Ruby script into IRB session
+  #
   def load_file
     fc = JFileChooser.new
     fc.setDialogTitle("Choose Ruby Script File")
     if fc.showOpenDialog(@frame) == JFileChooser::APPROVE_OPTION
-      STDERR.puts fc.getSelectedFile
       @ruby_main.file fc.getSelectedFile.absolute_path
     else
       STDERR.puts "Unrecognized Ruby Script File"

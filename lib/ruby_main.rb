@@ -48,13 +48,16 @@ class RubyMain
   # Process an invocation of this module with the given URI
   #
   def invoke uri
-    # Setting universally accessible constants in JRuby runtime for Moneydance access
-    # Not possible to do it in initialize since datafile is not yet loaded there
-    Object.const_set :MD, @context
-    Object.const_set :ROOT, MD.root_account
-    Object.const_set :TRANS, ROOT.transaction_set
-
     STDERR.puts "invoke called with: #{uri}"
+
+    unless defined? MD
+      # Setting universally accessible constants in JRuby runtime for Moneydance access
+      # Not possible to do it in initialize() since datafile is not yet loaded there
+      Object.const_set :MD, @context
+      Object.const_set :ROOT, MD.root_account
+      Object.const_set :TRANS, ROOT.transaction_set
+    end
+
     command, args = uri.split /[:?&]/
     send *[command, args].flatten.compact
   end
@@ -73,7 +76,9 @@ class RubyMain
   end
 
   java_signature 'synchronized void file(String path)'
-
+  # Loads Ruby script file located at *path*.
+  # Moneydance URI: moneydance:fmodule:ruby:file?/path/to/script.rb
+  #
   def file path
     STDERR.puts "file called with: #{path}"
     puts "Loading file: #{path}"
