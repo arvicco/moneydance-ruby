@@ -6,5 +6,5 @@ doc
 pkg
 build
 dist
-src/**/rb
+src/**/rb/*.java
 website/_site
