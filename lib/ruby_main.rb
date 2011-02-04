@@ -18,18 +18,13 @@ class RubyMain
   def initialize main, context, engine
     STDERR.puts 'Starting RubyMain...'
     @main, @context, @engine = main, context, engine
-    @root = context.get_root_account
-
-    # Setting universally accessible constants in JRuby runtime for Moneydance access
-    Object.const_set :MD, @context
-    Object.const_set :ROOT, @root
 
     # Register irb url to be invoked via the application toolbar
     @context.register_feature(@main, 'irb', icon('ruby'), @main.name);
   end
 
   java_signature 'java.awt.Image icon(String action)'
-
+  # Extracting extension icon (currently not used anywhere)
   def icon action = 'ruby'
     loader = @main.get_class.get_class_loader
     stream = loader.get_resource_as_stream("/com/moneydance/modules/features/ruby/#{action}.gif")
@@ -53,6 +48,12 @@ class RubyMain
   # Process an invocation of this module with the given URI
   #
   def invoke uri
+    # Setting universally accessible constants in JRuby runtime for Moneydance access
+    # Not possible to do it in initialize since datafile is not yet loaded there
+    Object.const_set :MD, @context
+    Object.const_set :ROOT, MD.root_account
+    Object.const_set :TRANS, ROOT.transaction_set
+
     STDERR.puts "invoke called with: #{uri}"
     command, args = uri.split /[:?&]/
     send *[command, args].flatten.compact

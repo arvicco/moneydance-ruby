@@ -15,19 +15,18 @@ import com.moneydance.modules.features.ruby.rb.*;
 public class Main
         extends FeatureModule {
 
-    private RubyEngine rubyEngine = null;
     private RubyMain rubyMain = null;
 
     /**
      * Initialize the extension. This is called just after the module is loaded.
-     * At this point the moneydance UI has already been loaded (but is not necessarily
+     * At this point the Moneydance UI has already been loaded (but is not necessarily
      * visible) and the data file may or may not have been loaded.
      */
     public void init() {
         System.err.println("init() called for extension: " +
                 getIDStr() + " by " + getVendor() + ", url: " + getVendorURL());
         try {
-            rubyEngine = new RubyEngine(this);
+            RubyEngine rubyEngine = new RubyEngine(this);
             rubyMain = new RubyMain(this, getContext(), rubyEngine);
         } catch (Exception e) {
             e.printStackTrace(System.err);
@@ -50,7 +49,7 @@ public class Main
     }
 
     /**
-     * This is called when an extension is invoked using a moneydance URI.
+     * This is called when an extension is invoked using a Moneydance URI.
      * Only the part of the URI after the extension identifier is included in the URI.
      * For example, if the following URI is invoked:
      * moneydance:module:taxman:show_summary:year=1999
