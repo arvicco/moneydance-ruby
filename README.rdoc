@@ -15,15 +15,19 @@ similar applications. However, previously this API only supported Java and Pytho
 
 Moneydance Ruby extends Moneydance by adding efficient Ruby scripting support to it.
 
-== PREREQUISITES
-
-You should have Moneydance 2010, Java 1.6 and JRuby 1.5.6+ installed and functional.
-
 == INSTALL EXTENSION
 
-Instructions and downloads are here[http://arvicco.github.com/moneydance-ruby].
+You should have Moneydance 2010 installed. Download {Ruby Extension}[http://github.com/downloads/arvicco/moneydance-ruby/ruby.mxt],
+save it as a file "ruby.mxt" on your computer. You can then install this file into
+Moneydance via Menu:Extensions->Add->From file [Next>] Choose ruby.ext file.
+Ignore the warning that you're loading unsigned extension.
+
+Detailed instructions and downloads are here[http://arvicco.github.com/moneydance-ruby].
 
 == INSTALL FROM SOURCE
+
+You should have Moneydance 2010, Java 1.6 and JRuby 1.5.6+ installed and functional.
+JRuby should be your active Ruby.
 
   $ git clone git://github.com/arvicco/moneydance-ruby.git
   $ cd moneydance-ruby
