@@ -216,7 +216,7 @@ get the attribute value or its close relative:
      - \#splits=2; **txn.getOtherTxnCount()**
      - chk=2; **txn.getCheckNumber(), txn.getCheckNumAsInt()**
      - acct=Checking; **txn.getAccount()**
-     - date=20050115; **txn.getDate()**
+     - date=20050115; **txn.getDateInt()**
      - splits=\[ SplitTxn(4), SplitTxn(5) \]
 
      - SplitTxn(4): **sxn = txn.getOtherTxn(0), sxn.getTxnId()**
@@ -237,6 +237,8 @@ get the attribute value or its close relative:
         - amt=-2000;
         - val=2000;
 
+Please note, proper function to retrieve transaction date is getDateInt, not
+getDate as expected (see explanation of MD date conversion specifics below).
 Other useful methods include the following. Methods called on **txn** apply to
 the parent transaction (instance of [ParentTxn](http://moneydance.com/dev/apidoc/com/moneydance/apps/md/model/ParentTxn.html))
 while **sxn** represents the first split transaction (instance of
@@ -441,32 +443,52 @@ You can get to an account's currency type from the Ruby console:
       09/01/2010  $30.00
       10/01/2010  $25.00
 
-    Moneydance date values are tracked as integers in a form of YYYYMMDD.
-    So, integer 20101001 is equivalent to 10/01/2010.
+    Moneydance date values are tracked as integers in a form of YYYYMMDD
+    (see explanation of MD date conversions below).
 
       > stock_currency.getRawRateByDateInt(20101001)
       3.333333333333333
       > stock_currency.getRawRateByDateInt(20101002)
       4.0
 
-    This integer date representation is OK when you need to manually lookup rate.
-    However, when you're manipulating currencies programmatically, you often need
-    to convert between Ruby Date/Time and Monedance date representation. Here is
-    an example of how to convert Ruby time into Moneydance format:
+## Moneydance Date/Time conversion
 
-      > ruby_date = Time.gm(2010, 12, 25)
-      Sat Dec 25 00:00:00 UTC 2010
-      > md_date = ruby_date.strftime("%Y%m%d").to_i
-      20101225
-      > stock_currency.getRawRateByDateInt(md_date)
-      4.0
+  Moneydance date values may be accessed in two ways. Getters such as
+  Txn#getDate, CurrencyType.getRawRateByDate return a number of milliseconds
+  since start of Unix era. You can convert it into Ruby Time like this:
 
-    Here is an example of reverse conversion, from Moneydance date format to Ruby Time:
+    > md_date = txns.last.getDate
+    1308124800000
+    > ruby_date = Time.at md_date/1000     # Time.at needs seconds, not millis
+    Wed Jun 15 12:00:00 +0400 2011
 
-      > md_date = 20101225
-      20101225
-      > ruby_date = Time.gm(*md_date.to_s.match(/(....)(..)(..)/).captures)
-      Sat Dec 25 00:00:00 UTC 2010
+  In fact, this way of getting/setting Moneydance time is considered deprecated.
+  Recommended way of getting/setting time is through use of accessors such as
+  Txn#getDateInt, CurrencyType.getRawRateByDateInt. These return time as integers
+  in a form of YYYYMMDD. So, integer 20101001 is equivalent to 10/01/2010.
+
+    > txns.last.getDateInt
+    20110615
+
+  This integer date representation works great when all you need is to see the date.
+  It is definitely much easier to interpret when obscure number of Unix-time millis.
+  However, when you're manipulating currencies programmatically, you often need to
+  convert between Ruby Date/Time and Monedance date representation. Here is an example
+  of how to convert Ruby time into Moneydance format:
+
+    > ruby_date = Time.gm 2010, 12, 25
+    Sat Dec 25 00:00:00 UTC 2010
+    > md_date_int = ruby_date.strftime("%Y%m%d").to_i
+    20101225
+    > stock_currency.getRawRateByDateInt(md_date_int)
+    4.0
+
+  Here is an example of reverse conversion, from Moneydance date format to Ruby Time:
+
+    > md_date_int = 20101225
+    20101225
+    > ruby_date = Time.gm(*md_date_int.to_s.match(/(....)(..)(..)/).captures)
+    Sat Dec 25 00:00:00 UTC 2010
 
 ## Credits
 
