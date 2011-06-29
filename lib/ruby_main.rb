@@ -70,7 +70,7 @@ class RubyMain
     if @console
       @console.show
     else
-      # We need to address RubyConsole via full java name... Why?
+      # We need to address compiled RubyConsole via full java name... Why?
       @console ||= com.moneydance.modules.features.ruby.rb.RubyConsole.new self
     end
   end

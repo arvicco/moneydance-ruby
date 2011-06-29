@@ -82,7 +82,6 @@ public class RubyConsole extends RubyObject implements ActionListener {
             "    pane.add(@irb_pane, AwtUtil.getConstraints(0, 0, 1, 1, 4, 1, true, true))\n" +
             "    pane.add(@file_button, AwtUtil.getConstraints(0, 3, 1, 0, 1, 1, false, true))\n" +
             "\n" +
-            "#    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);\n" +
             "#    enableEvents(WindowEvent.WINDOW_CLOSING);\n" +
             "    @file_button.addActionListener(self)\n" +
             "\n" +
@@ -90,7 +89,7 @@ public class RubyConsole extends RubyObject implements ActionListener {
             "                            \"(tab will autocomplete)\"\n" +
             "    @frame.default_close_operation = close_operation\n" +
             "    @frame.set_size 800, 800\n" +
-            "    @frame.content_pane.add pane\n" +
+            "    @frame.content_pane.add pane # @frame.add pane\n" +
             "\n" +
             "    header = \" MD - Moneydance context: ComMoneydanceAppsMdController::Main \\n\" +\n" +
             "        \" ROOT - Moneydance root account: ComMoneydanceAppsMdModel::RootAccount \\n\" +\n" +

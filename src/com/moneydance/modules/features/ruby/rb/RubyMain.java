@@ -87,14 +87,14 @@ public class RubyMain extends RubyObject  {
             "    if @console\n" +
             "      @console.show\n" +
             "    else\n" +
-            "      # We need to address RubyConsole via full java name... Why?\n" +
+            "      # We need to address compiled RubyConsole via full java name... Why?\n" +
             "      @console ||= com.moneydance.modules.features.ruby.rb.RubyConsole.new self\n" +
             "    end\n" +
             "  end\n" +
             "\n" +
             "  java_signature 'synchronized void file(String path)'\n" +
             "  # Loads Ruby script file located at *path*.\n" +
-            "  # Moneydance URI: moneydance:fmodule:ruby:irb\n" +
+            "  # Moneydance URI: moneydance:fmodule:ruby:file?/path/to/script.rb\n" +
             "  #\n" +
             "  def file path\n" +
             "    STDERR.puts \"file called with: #{path}\"\n" +

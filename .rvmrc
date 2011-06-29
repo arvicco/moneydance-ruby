@@ -1,1 +1,1 @@
-rvm jruby
+rvm use jruby

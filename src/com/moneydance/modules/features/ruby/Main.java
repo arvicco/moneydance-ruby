@@ -35,7 +35,7 @@ public class Main
 
     /**
      * Get a descriptive name for this extension. This is called before Main#init(),
-     * so it is not possible to delegate to RubyMain
+     * so it is not possible to delegate to rubyMain
      */
     public String getName() {
         return "Ruby Interface";
@@ -66,5 +66,15 @@ public class Main
      */
     public void cleanup() {
         rubyMain.cleanup();
+    }
+
+    /**
+     * Notifies the extension that the given application event has occurred.
+     * More information on events triggered by Moneydance will be available at a later date.
+     */
+    public void handleEvent(String appEvent) {
+        System.err.println("handleEvent: " + appEvent);
+        if (appEvent.startsWith("md:file:opened") || appEvent.startsWith("md:file:closed")) {
+        }
     }
 }

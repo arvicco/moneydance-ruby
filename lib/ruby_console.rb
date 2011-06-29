@@ -65,7 +65,6 @@ class RubyConsole
     pane.add(@irb_pane, AwtUtil.getConstraints(0, 0, 1, 1, 4, 1, true, true))
     pane.add(@file_button, AwtUtil.getConstraints(0, 3, 1, 0, 1, 1, false, true))
 
-#    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 #    enableEvents(WindowEvent.WINDOW_CLOSING);
     @file_button.addActionListener(self)
 
@@ -73,7 +72,7 @@ class RubyConsole
                             "(tab will autocomplete)"
     @frame.default_close_operation = close_operation
     @frame.set_size 800, 800
-    @frame.content_pane.add pane
+    @frame.content_pane.add pane # @frame.add pane
 
     header = " MD - Moneydance context: ComMoneydanceAppsMdController::Main \n" +
         " ROOT - Moneydance root account: ComMoneydanceAppsMdModel::RootAccount \n" +
